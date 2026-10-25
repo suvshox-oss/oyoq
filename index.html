@@ -363,6 +363,7 @@ footer.disc{font-size:12.5px;color:var(--muted);padding-block:6px 30px}
       <div class="tbl-wrap"><table class="params" id="rotTable"></table></div>
       <p class="muted" style="font-size:12.5px;margin:0">Normalar: РБед 10–20°, РГол 20–30°, ИнтР 10–20°. ИнтР = РГол − РБед. УКБ/УКГ: «+» — ichkariga, «−» — tashqariga burish. Boldir torsiyasi son kondillari chizig'iga (β) nisbatan hisoblanadi, shuning uchun tizzadagi rotatsiyani ham o'z ichiga oladi.</p>
     </div>
+    <details class="card" id="rotRulesCard" style="display:grid;gap:10px"><summary style="cursor:pointer;font-weight:700"><span id="rotRulesTitle">Bagirov sxemasi qoidalari</span></summary><div id="rotRules" style="display:grid;gap:10px;margin-top:10px"></div></details>
     <div class="card" style="display:grid;gap:12px" id="ctMeasure">
       <div class="row" style="justify-content:space-between"><b>KT kesimida o'lchash</b><span class="muted" id="axInfo" style="font-size:13px"></span></div>
       <div id="axEmpty" class="muted">Aksial KT seriyasi yuklanganda bu yerda kesimlarni ko'rib, o'qlarni bosib belgilash mumkin. «Yuklash» bo'limida MSKT ZIP faylini oching.</div>
@@ -2121,6 +2122,8 @@ window.OYOQ_TPL_B64="Z2xURgIAAAAUPxcA7NoAAEpTT057ImFzc2V0Ijp7ImdlbmVyYXRvciI6Imd
     if (g < 0) t.push(L('Boldirning tashqi buralishi kamaygan (ichki torsiya tomon) — oyoq panjasi ichkariga qaraydi.', 'Наружная торсия голени снижена (в сторону внутренней торсии) — стопа развёрнута внутрь.'));
     if (i !== 0) t.push(i > 0 ? L('Umumiy (integral) rotatsiya oshgan: oyoq panjasi tashqariga burilgan.', 'Интегральная ротация увеличена: стопа развёрнута наружу.') : L('Umumiy (integral) rotatsiya kamaygan: oyoq panjasi ichkariga burilgan.', 'Интегральная ротация снижена: стопа развёрнута внутрь.'));
     if (!t.length) t.push(L('Son, boldir va umumiy rotatsiya normada.', 'Ротация бедра, голени и интегральная ротация в норме.'));
+    else if (i === 0 && (f !== 0 || g !== 0)) t.push(L('Son va boldir buralishlari bir-birini kompensatsiya qilgan — umumiy (integral) torsiya normada.', 'Торсии бедра и голени компенсируют друг друга — интегрированная торсия в норме.'));
+    else if (f !== 0 && g !== 0 && i !== 0) t.push(L('Son va boldir buralishlari qo\'shilib, umumiy torsiyani normadan chiqargan.', 'Торсии бедра и голени суммируются и выводят интегрированную торсию за пределы нормы.'));
     return t.join(' ');
   }
   function renderRot() {
@@ -2143,7 +2146,16 @@ window.OYOQ_TPL_B64="Z2xURgIAAAAUPxcA7NoAAEpTT057ImFzc2V0Ijp7ImdlbmVyYXRvciI6Imd
     const sum = [];
     if (res.R && res.L) {
       const dF = Math.abs(res.R.RBed - res.L.RBed), dT = Math.abs(res.R.RGol - res.L.RGol);
-      if (dF > 10 || dT > 10) sum.push(`<div class="notice warn">${L(`Ikki oyoq orasida sezilarli farq: son ${dF.toFixed(1)}°, boldir ${dT.toFixed(1)}°. 10° dan ortiq assimetriya yurishda seziladi.`, `Значимая асимметрия между ногами: бедро ${dF.toFixed(1)}°, голень ${dT.toFixed(1)}°. Асимметрия более 10° заметна при ходьбе.`)}</div>`);
+      const ROWS = [['RBed', L('son', 'бедро')], ['RGol', L('boldir', 'голень')], ['IntR', L('integral', 'интегр.')]];
+      const outBy = (k, v) => { const [lo, hi] = C.ROT_NORMS[k]; return v < lo ? lo - v : v > hi ? v - hi : 0; };
+      const symAll = ROWS.filter(([k]) => { const a = C.rotStatus(k, res.R[k]), b = C.rotStatus(k, res.L[k]); return a !== 0 && a === b && Math.abs(res.R[k] - res.L[k]) <= 5; });
+      const symm = symAll.filter(([k]) => Math.max(outBy(k, res.R[k]), outBy(k, res.L[k])) <= 5).map(([, n]) => n);
+      const symBig = symAll.filter(([k]) => Math.max(outBy(k, res.R[k]), outBy(k, res.L[k])) > 5).map(([, n]) => n);
+      if (symBig.length) sum.push(`<div class="notice warn">${L(`Ikkala oyoqda bir xil, lekin katta chetlanish (${symBig.join(', ')}): normadan 5° dan ko'p. Simmetriya bu holatni maqbul qilmaydi — ikki tomonlama korreksiya zarurligini baholang.`, `Одинаковое, но выраженное отклонение с обеих сторон (${symBig.join(', ')}): более 5° за пределами нормы. Симметричность не делает его допустимым — оцените необходимость двусторонней коррекции.`)}</div>`);
+      if (symm.length) sum.push(`<div class="notice ok">${L(`Simmetrik chetlanish (${symm.join(', ')}): ikkala oyoqda bir xil yo'nalishda farq ≤5°, normadan chetlanish ≤5°. Bagirov qoidasiga ko'ra, kichik simmetrik chetlanish ayrim hollarda maqbul bo'lishi mumkin — klinik ko'rik bilan baholang.`, `Симметричное отклонение (${symm.join(', ')}): в одну сторону с обеих сторон, разница ≤5°, выход за норму ≤5°. По правилу Багирова незначительное симметричное отклонение в ряде случаев допустимо — оцените с клиническим осмотром.`)}</div>`);
+      const dI = Math.abs(res.R.IntR - res.L.IntR);
+      if (dI > 10 && dF <= 10 && dT <= 10) sum.push(`<div class="notice warn">${L(`Integral torsiyada ikki oyoq orasida ${dI.toFixed(1)}° farq.`, `Разница интегрированной торсии между конечностями ${dI.toFixed(1)}°.`)}</div>`);
+      if (dF > 10 || dT > 10) sum.push(`<div class="notice warn">${L(`Ikki oyoq orasida sezilarli farq: son ${dF.toFixed(1)}°, boldir ${dT.toFixed(1)}°. 10° dan ortiq assimetriya yurishda seziladi. Bagirov qoidasi: torsiyadagi sezilarli farq maqbul emas — yurish biomexanikasi buziladi.`, `Значимая асимметрия между ногами: бедро ${dF.toFixed(1)}°, голень ${dT.toFixed(1)}°. Асимметрия более 10° заметна при ходьбе. Правило Багирова: значительная разница торсии недопустима — нарушается биомеханика ходьбы.`)}</div>`);
     }
     if (!res.R && !res.L) sum.push(`<span class="muted">${L('Burchaklar kiritilmagan.', 'Углы не введены.')}</span>`);
     $('rotSummary').innerHTML = sum.join('') || `<span class="muted">${L('Assimetriya 10° dan kam.', 'Асимметрия менее 10°.')}</span>`;
@@ -2178,7 +2190,37 @@ window.OYOQ_TPL_B64="Z2xURgIAAAAUPxcA7NoAAEpTT057ImFzc2V0Ijp7ImdlbmVyYXRvciI6Imd
   };
   const AXHINT = new Proxy({}, { get: (_, k) => AXHINT_[L('uz', 'ru')][k] });
   const axStage = $('axStage'), axCv = $('axCv'), axCtx = axCv.getContext('2d');
+  function renderRotRules() {
+    $('rotRulesTitle').textContent = L('Bagirov sxemasi qoidalari (o\'lchash va baholash)', 'Правила схемы Багирова (измерение и оценка)');
+    const sec = (t, items) => `<div><b style="font-size:14px">${t}</b><ul style="margin:6px 0 0;padding-left:20px;display:grid;gap:4px;font-size:14px;line-height:1.45">${items.map(x => `<li>${x}</li>`).join('')}</ul></div>`;
+    $('rotRules').innerHTML = [
+      sec(L('1. Burchaklar qayerda o\'lchanadi (aksial kesimlar)', '1. Где измеряются углы (аксиальные срезы)'), [
+        L('<b>α</b> — son bo\'ynining o\'rtasidan o\'tgan chiziqning <b>frontal tekislikdan</b> og\'ishi (chanoq-son bo\'g\'imi kesimlari). Burchak <b>orqaga ochiq</b> bo\'lsa — manfiy (−).', '<b>α</b> — угол отклонения от <b>фронтальной плоскости</b> линии, проходящей по середине шейки бедра (срезы тазобедренного сустава). Если угол <b>открыт кзади</b> — знак (−).'),
+        L('Son bo\'yni valgus bo\'lsa, α ni topish uchun frontal tekislikdagi MPR tasvirni ikki tomonga <b>30° gacha</b> aylantirib, bo\'yin o\'qi to\'liq ko\'rinadigan holat tanlanadi.', 'При вальгусной деформации шейки бедра для определения α МПР-изображение во фронтальной плоскости вращают в разные стороны <b>до 30°</b>, добиваясь полного выведения оси шейки.'),
+        L('<b>β</b> — son kondillarining <b>orqa yuzasini</b> tutashtiruvchi chiziqning frontal tekislikdan og\'ishi (tizza kesimlari). Burchak <b>ichkariga ochiq</b> bo\'lsa — manfiy (−).', '<b>β</b> — угол отклонения от фронтальной плоскости линии, соединяющей мыщелки бедра <b>по задней поверхности</b> (срезы коленного сустава). Если угол <b>открыт вовнутрь</b> — знак (−).'),
+        L('<b>γ</b> — kichik boldir to\'pig\'ining <b>bo\'g\'im yuzasi</b> bo\'ylab o\'tgan chiziqning <b>sagittal tekislikdan</b> og\'ishi (boldir-panja bo\'g\'imi kesimlari). Burchak <b>ichkariga ochiq</b> bo\'lsa — manfiy (−).', '<b>γ</b> — угол отклонения от <b>сагиттальной плоскости</b> линии, расположенной по суставной поверхности лодыжки малоберцовой кости (срезы голеностопного сустава). Если угол <b>открыт вовнутрь</b> — знак (−).'),
+        L('Ishorani albatta saqlang: manfiy va musbat qiymatlarni aralashtirish natijani butunlay o\'zgartiradi.', 'Обязательно сохраняйте знак: путаница плюса и минуса полностью меняет результат.'),
+      ]),
+      sec(L('2. Hisoblash va normalar', '2. Расчёт и нормы'), [
+        L('Son torsiyasi <b>РБед = α + β</b>, norma 10–20°.', 'Торсия бедра <b>РБед = α + β</b>, норма 10–20°.'),
+        L('Boldir torsiyasi <b>РГол = β + γ</b>, norma 20–30°.', 'Торсия голени <b>РГол = β + γ</b>, норма 20–30°.'),
+        L('Integral torsiya <b>ИнтР = γ − α</b>, norma 10–20°.', 'Интегрированная торсия <b>ИнтР = γ − α</b>, норма 10–20°.'),
+        L('Bu uchtasi bog\'liq: <b>ИнтР = РГол − РБед</b>. Mustaqil o\'lchov faqat ikkita. ИнтР son va boldir buralishlari bir-birini <b>kompensatsiya</b> qilganini yoki qo\'shilib ketganini ko\'rsatadi.', 'Три показателя связаны: <b>ИнтР = РГол − РБед</b>, независимых величин только две. ИнтР показывает, <b>компенсируют</b> ли торсии бедра и голени друг друга или суммируются.'),
+      ]),
+      sec(L('3. Ikki oyoqni solishtirish', '3. Сравнение двух конечностей'), [
+        L('Ikkala oyoq <b>bir xil usulda</b> o\'lchanadi va har bir ko\'rsatkich uchun o\'ng, chap va farq yoziladi.', 'Обе конечности измеряются <b>по одной методике</b>; для каждого показателя фиксируются правая, левая и разница.'),
+        L('Normadan <b>kichik chetlanish</b>, agar ikkala tomonda bir xil bo\'lsa, ayrim hollarda <b>maqbul</b> deb hisoblanishi mumkin.', '<b>Незначительные отклонения</b> от нормы в некоторых случаях могут считаться <b>допустимыми</b>, если они одинаковы с обеих сторон.'),
+        L('Ikki oyoq orasida <b>sezilarli farq maqbul emas</b> — ayniqsa torsiyada: yurish biomexanikasi buziladi va skeletning boshqa bo\'limlarida deformatsiya rivojlanadi.', '<b>Недопустима значительная разница</b> показателей двух конечностей — особенно торсионных: нарушается биомеханика ходьбы, что приводит к деформации других отделов скелета.'),
+      ]),
+      sec(L('4. Korreksiya', '4. Коррекция'), [
+        L('Korreksiyadan keyin: РБед + УКБ, РГол − УКГ, ИнтР − УКБ − УКГ. «+» — ichkariga, «−» — tashqariga burish.', 'После коррекции: РБед + УКБ, РГол − УКГ, ИнтР − УКБ − УКГ. «+» — разворот внутрь, «−» — наружу.'),
+        L('Maqsad — har bir ko\'rsatkichni normaga yaqinlashtirish va ikki oyoq orasidagi farqni kamaytirish.', 'Цель — приблизить каждый показатель к норме и уменьшить разницу между конечностями.'),
+      ]),
+      `<p class="muted" style="margin:0;font-size:12.5px">${L('Manba: А.Б. Багиров, «КТ длинных костей нижних конечностей по предложенной нами схеме» (НМИЦ ТО им. Н.Н. Приорова). Normalar muallif metodikasiga xos; boshqa KT protokollari bilan olingan qiymatlarga to\'g\'ridan-to\'g\'ri ko\'chirilmaydi. «Sezilarli farq» uchun muallif aniq chegara bermagan — ilovadagi 10° chegara ishchi taxmin.', 'Источник: А.Б. Багиров, «КТ длинных костей нижних конечностей по предложенной нами схеме» (НМИЦ ТО им. Н.Н. Приорова). Нормы относятся к методике автора и не переносятся напрямую на другие КТ-протоколы. Числового порога «значительной разницы» автор не приводит — порог 10° в приложении является рабочим допущением.')}</p>`,
+    ].join('');
+  }
   function showRot() {
+    renderRotRules();
     if (!$('rotLegs').children.length) buildRotLegs();
     renderRot();
     const s = S.axSeries;
@@ -2280,7 +2322,7 @@ window.OYOQ_TPL_B64="Z2xURgIAAAAUPxcA7NoAAEpTT057ImFzc2V0Ijp7ImdlbmVyYXRvciI6Imd
     renderList(); updateLive(); updateCalState(); draw();
     if (S.study && !$('studyCard').hidden) showStudyCard();
     if (!$('v-result').hidden) renderResults();
-    if ($('rotLegs').children.length) { buildRotLegs(); renderRot(); }
+    if ($('rotLegs').children.length) { renderRotRules(); buildRotLegs(); renderRot(); }
     if (!$('axTool').hidden) { renderAxList(); $('axHint').textContent = AXHINT[AX.axis]; drawAx(); }
   };
   // ---------------- Boshlash ----------------
@@ -2360,7 +2402,7 @@ window.OYOQ_TPL_B64="Z2xURgIAAAAUPxcA7NoAAEpTT057ImFzc2V0Ijp7ImdlbmVyYXRvciI6Imd
     "Ishora qoidasi: o'qning ichki (medial) uchi tashqi uchidan oldinda bo'lsa — musbat. α va γ shunday olinadi, β esa teskari ishora bilan (β = −kondillar burchagi), shunda РБед = α+β va РГол = β+γ klassik anteversiya va boldir torsiyasiga teng bo'ladi. Bu ishora qoidasi Excel ma'lumotlari asosida aniqlangan — sxema muallifi bilan tasdiqlang.": 'Правило знака: если медиальный конец оси впереди латерального — угол положительный. Так берутся α и γ, а β — с обратным знаком (β = −угол мыщелков); тогда РБед = α+β и РГол = β+γ соответствуют классической антеторсии бедра и торсии голени. Правило знака выведено из данных таблицы Excel — подтвердите его у автора схемы.',
     "Oyoq O'qi — o'quv va yordamchi vosita. Tashxis qo'ymaydi va davolash rejasini almashtirmaydi; natijani ortoped-travmatolog tekshirishi shart.": 'Oyoq O\'qi — учебный и вспомогательный инструмент. Не ставит диагноз и не заменяет план лечения; результат обязательно проверяет травматолог-ортопед.',
   };
-  const SKIP = new Set(['resultBody', 'lmList', 'liveBox', 'rotLegs', 'rotSummary', 'rotTable', 'axList', 'studyCard', 'loadMsg', 'guideTitle', 'guideText', 'tip', 'calState', 'axHint', 'axInfo', 'axZLabel', 'hudInfo', 'axHud', 'seriesSel', 'loadTitle', 'loadNote', 'miniLeg']);
+  const SKIP = new Set(['resultBody', 'lmList', 'liveBox', 'rotLegs', 'rotSummary', 'rotTable', 'rotRules', 'rotRulesTitle', 'axList', 'studyCard', 'loadMsg', 'guideTitle', 'guideText', 'tip', 'calState', 'axHint', 'axInfo', 'axZLabel', 'hudInfo', 'axHud', 'seriesSel', 'loadTitle', 'loadNote', 'miniLeg']);
   const orig = new WeakMap(), origAttr = new WeakMap();
   const norm = s => s.replace(/\s+/g, ' ').trim();
   function walk(node, lang) {
