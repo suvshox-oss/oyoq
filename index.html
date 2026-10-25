@@ -1,0 +1,1803 @@
+<!doctype html>
+<html lang="uz"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<link rel="manifest" href="manifest.json">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Oyoq O'qi">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<link rel="icon" href="icon-192.png">
+<title>Oyoq O'qi</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<meta name="theme-color" content="#0f1a22">
+<style>
+:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}[hidden]{display:none!important}body{margin:0}img{max-width:100%}
+
+/* Layout: chap ustun — yo'riqnoma va boshqaruv, o'ng — qorong'i "negatoskop" maydoni; telefonda bitta ustun */
+:root{
+  --bg:#ecf1f3; --surface:#ffffff; --surface-2:#f5f8f9; --ink:#122029; --muted:#5b6c77; --line:#d4dee3;
+  --accent:#0b6e8a; --accent-ink:#ffffff; --accent-soft:#dcedf2;
+  --ok:#23825a; --ok-soft:#dff1e8; --warn:#b7780a; --warn-soft:#fbefd5; --bad:#be3a2e; --bad-soft:#f8e1de;
+  --lightbox:#0c151b; --lightbox-ink:#d7e3ea; --lightbox-line:#22323d;
+  --pt-r:#ff8a3d; --pt-l:#46c1e8; --axis:#ff4d5e; --norm:#3fd28e;
+  --f-ui:"Onest",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+  --f-num:"JetBrains Mono",ui-monospace,"SFMono-Regular",Menlo,monospace;
+  --r:12px;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#0d1419; --surface:#141e25; --surface-2:#18242c; --ink:#e3ecf0; --muted:#93a5b0; --line:#26353f;
+  --accent:#3fb0d0; --accent-ink:#06161d; --accent-soft:#163541;
+  --ok:#4cc38a; --ok-soft:#14312a; --warn:#e6a93a; --warn-soft:#352a12; --bad:#ef6b5e; --bad-soft:#3a1a17;
+  --lightbox:#070c10; --lightbox-ink:#d7e3ea; --lightbox-line:#1f2c35; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#0d1419; --surface:#141e25; --surface-2:#18242c; --ink:#e3ecf0; --muted:#93a5b0; --line:#26353f;
+  --accent:#3fb0d0; --accent-ink:#06161d; --accent-soft:#163541;
+  --ok:#4cc38a; --ok-soft:#14312a; --warn:#e6a93a; --warn-soft:#352a12; --bad:#ef6b5e; --bad-soft:#3a1a17;
+  --lightbox:#070c10; --lightbox-ink:#d7e3ea; --lightbox-line:#1f2c35; color-scheme:dark}
+*{box-sizing:border-box}
+html,body{height:100%}
+body{background:var(--bg);color:var(--ink);font:15px/1.5 var(--f-ui);-webkit-text-size-adjust:100%}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:10;background:var(--surface)}
+button,input,select{font:inherit;color:inherit}
+h1,h2,h3{margin:0;text-wrap:balance;line-height:1.2}
+.num{font-family:var(--f-num);font-variant-numeric:tabular-nums}
+.wrap{max-width:1280px;margin:0 auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+
+/* header */
+header.top{position:sticky;top:env(safe-area-inset-top,0px);z-index:9;background:var(--surface);border-bottom:1px solid var(--line)}
+.top .wrap{display:flex;align-items:center;gap:16px;padding-block:10px;flex-wrap:wrap}
+.brand{display:flex;align-items:center;gap:10px;min-width:0}
+.brand svg{flex:none}
+.brand b{font-size:18px;font-weight:800;letter-spacing:-.01em}
+.brand small{display:block;color:var(--muted);font-size:12px;line-height:1.2}
+nav.steps{display:flex;gap:4px;margin-left:auto;background:var(--surface-2);border:1px solid var(--line);border-radius:999px;padding:3px;overflow-x:auto;max-width:100%}
+nav.steps button{border:0;background:transparent;padding:7px 14px;border-radius:999px;cursor:pointer;white-space:nowrap;font-weight:600;font-size:14px;color:var(--muted);display:flex;gap:6px;align-items:center}
+nav.steps button .n{font-family:var(--f-num);font-size:11px;width:18px;height:18px;border-radius:50%;display:inline-grid;place-items:center;border:1px solid currentColor}
+nav.steps button[aria-selected="true"]{background:var(--accent);color:var(--accent-ink)}
+nav.steps button:focus-visible,.btn:focus-visible,.chip:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.demo-flag{font-size:12px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--warn);background:var(--warn-soft);padding:3px 8px;border-radius:6px}
+
+main{padding-block:20px 40px}
+section.view{display:grid;gap:18px}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:18px}
+.muted{color:var(--muted)}
+.eyebrow{font-size:12px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;border:1px solid var(--line);background:var(--surface);padding:9px 14px;border-radius:10px;cursor:pointer;font-weight:600;font-size:14px;text-decoration:none}
+.btn:hover{border-color:var(--accent)}
+.btn.primary{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
+.btn.small{padding:6px 10px;font-size:13px}
+.btn[disabled]{opacity:.45;cursor:not-allowed}
+.row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+
+/* upload */
+.hero{display:grid;grid-template-columns:1.1fr .9fr;gap:18px}
+@media (max-width:860px){.hero{grid-template-columns:1fr}}
+.hero h1{font-size:clamp(26px,4vw,38px);font-weight:800;letter-spacing:-.02em;max-width:18ch}
+.hero p{max-width:60ch}
+.drop{border:2px dashed var(--line);border-radius:var(--r);padding:26px;display:grid;gap:12px;justify-items:start;background:var(--surface-2);transition:border-color .15s}
+.drop.over{border-color:var(--accent);background:var(--accent-soft)}
+.drop input{display:none}
+.howto{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
+@media (max-width:640px){.howto{grid-template-columns:1fr}}
+.howto div{display:grid;gap:4px;padding:14px;border-radius:10px;background:var(--surface-2);border:1px solid var(--line)}
+.howto b{font-size:15px}
+.progress{height:6px;border-radius:6px;background:var(--line);overflow:hidden}
+.progress i{display:block;height:100%;width:0;background:var(--accent);transition:width .2s}
+.notice{padding:12px 14px;border-radius:10px;font-size:14px;line-height:1.45}
+.notice.warn{background:var(--warn-soft);color:var(--ink);border:1px solid color-mix(in srgb,var(--warn) 40%,transparent)}
+.notice.bad{background:var(--bad-soft);border:1px solid color-mix(in srgb,var(--bad) 40%,transparent)}
+.notice.ok{background:var(--ok-soft);border:1px solid color-mix(in srgb,var(--ok) 40%,transparent)}
+.kv{display:grid;grid-template-columns:auto 1fr;gap:4px 14px;font-size:14px}
+.kv dt{color:var(--muted)} .kv dd{margin:0}
+
+/* landmarks */
+.editor{display:grid;grid-template-columns:340px minmax(0,1fr);gap:16px;align-items:start}
+@media (max-width:900px){.editor{grid-template-columns:1fr}.editor .side{order:2}}
+.side{display:grid;gap:14px}
+.seg{display:inline-flex;background:var(--surface-2);border:1px solid var(--line);border-radius:10px;padding:3px;gap:3px}
+.seg button{border:0;background:transparent;padding:7px 12px;border-radius:8px;cursor:pointer;font-weight:600;font-size:14px;color:var(--muted);display:flex;align-items:center;gap:6px}
+.seg button[aria-pressed="true"]{background:var(--surface);color:var(--ink);box-shadow:0 1px 2px rgb(0 0 0 / .12)}
+.dot{width:10px;height:10px;border-radius:50%;display:inline-block;flex:none}
+.lm-list{display:grid;gap:6px;margin:0;padding:0;list-style:none}
+.lm-list button{width:100%;text-align:left;display:grid;grid-template-columns:22px 1fr auto;gap:10px;align-items:center;border:1px solid var(--line);background:var(--surface);border-radius:10px;padding:9px 10px;cursor:pointer}
+.lm-list button[aria-current="step"]{border-color:var(--accent);box-shadow:inset 3px 0 0 var(--accent)}
+.lm-list .st{width:20px;height:20px;border-radius:50%;border:2px solid var(--line);display:grid;place-items:center;font-size:11px}
+.lm-list .done .st{background:var(--ok);border-color:var(--ok);color:#fff}
+.lm-list small{color:var(--muted);font-size:12px}
+.guide{display:grid;grid-template-columns:72px 1fr;gap:12px;align-items:start}
+.guide svg{width:72px;height:auto;background:var(--lightbox);border-radius:8px}
+.guide p{margin:2px 0 0;font-size:14px}
+.stage{position:relative;background:var(--lightbox);border-radius:var(--r);overflow:hidden;height:min(78vh,860px);min-height:420px;touch-action:none;user-select:none;-webkit-user-select:none}
+@media (max-width:900px){.stage{height:68vh}}
+.stage canvas{position:absolute;inset:0;width:100%;height:100%;display:block}
+.stage .hud{position:absolute;left:10px;right:10px;top:10px;display:flex;justify-content:space-between;gap:8px;pointer-events:none;color:var(--lightbox-ink);font-size:12px;font-weight:700;letter-spacing:.08em}
+.stage .tools{position:absolute;right:10px;bottom:10px;display:flex;gap:6px;flex-direction:column}
+.stage .tools button{width:38px;height:38px;border-radius:10px;border:1px solid var(--lightbox-line);background:rgb(12 21 27 / .82);color:var(--lightbox-ink);cursor:pointer;font-size:18px;display:grid;place-items:center}
+.stage .tip{position:absolute;left:10px;bottom:10px;right:60px;color:var(--lightbox-ink);font-size:13px;background:rgb(12 21 27 / .78);border:1px solid var(--lightbox-line);border-radius:10px;padding:8px 10px;pointer-events:none}
+.live{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.live div{border:1px solid var(--line);border-radius:10px;padding:8px 10px;background:var(--surface-2)}
+.live b{font-family:var(--f-num);font-size:18px}
+label.slider{display:grid;gap:4px;font-size:13px;color:var(--muted)}
+input[type=range]{width:100%;accent-color:var(--accent)}
+
+/* results */
+.legs{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px}
+@media (max-width:820px){.legs{grid-template-columns:1fr}}
+.legcard{display:grid;gap:14px;align-content:start}
+.legcard header{display:flex;justify-content:space-between;align-items:baseline;gap:8px;flex-wrap:wrap}
+.legcard h2{font-size:20px}
+.verdict{display:flex;align-items:flex-end;gap:14px;flex-wrap:wrap}
+.verdict .big{font-family:var(--f-num);font-size:44px;font-weight:600;line-height:1;letter-spacing:-.02em}
+.verdict .big small{font-size:18px}
+.pill{display:inline-flex;align-items:center;gap:6px;padding:4px 10px;border-radius:999px;font-size:13px;font-weight:700}
+.pill.g0{background:var(--ok-soft);color:var(--ok)} .pill.g1{background:var(--warn-soft);color:var(--warn)}
+.pill.g2{background:var(--bad-soft);color:var(--bad)} .pill.g3{background:var(--bad);color:#fff}
+.gauge{width:100%;max-width:360px;height:auto;display:block}
+.explain{font-size:15px;max-width:62ch}
+.where{display:grid;gap:6px;margin:0;padding:0;list-style:none}
+.where li{display:flex;gap:8px;align-items:baseline;font-size:14px}
+.risks{display:grid;gap:8px;margin:0;padding:0;list-style:none}
+.risks li{display:grid;grid-template-columns:auto 1fr;gap:10px;align-items:start;padding:10px 12px;border-radius:10px;background:var(--surface-2);border:1px solid var(--line)}
+.risks b{font-size:14px} .risks p{margin:2px 0 0;font-size:13px;color:var(--muted)}
+.meter{display:flex;gap:3px;padding-top:4px}
+.meter i{width:7px;height:16px;border-radius:2px;background:var(--line)}
+.meter.l1 i:nth-child(-n+1){background:var(--warn)} .meter.l2 i:nth-child(-n+2){background:var(--warn)} .meter.l3 i{background:var(--bad)}
+.tbl-wrap{overflow-x:auto}
+table.params{width:100%;border-collapse:collapse;font-size:14px;min-width:560px}
+table.params th,table.params td{padding:9px 10px;border-bottom:1px solid var(--line);text-align:left;vertical-align:top}
+table.params th{font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);font-weight:700}
+table.params td.num{white-space:nowrap}
+.flag{display:inline-block;width:8px;height:8px;border-radius:50%;margin-right:6px;vertical-align:middle}
+.flag.ok{background:var(--ok)} .flag.out{background:var(--bad)} .flag.na{background:var(--line)}
+.thumb{background:var(--lightbox);border-radius:var(--r);overflow:hidden;display:grid;place-items:center}
+.thumb canvas{max-width:100%;height:auto;display:block}
+.two{display:grid;grid-template-columns:minmax(0,1.3fr) minmax(0,1fr);gap:16px}
+@media (max-width:820px){.two{grid-template-columns:1fr}}
+.refs{font-size:13px;color:var(--muted);display:grid;gap:4px;margin:0;padding-left:18px}
+
+/* 3D */
+.three{display:grid;grid-template-columns:minmax(0,1fr) 300px;gap:16px;align-items:start}
+@media (max-width:900px){.three{grid-template-columns:1fr}}
+.three .stage{height:min(80vh,860px)}
+.chips{display:flex;gap:6px;flex-wrap:wrap}
+.chip{border:1px solid var(--line);background:var(--surface);border-radius:999px;padding:6px 12px;cursor:pointer;font-size:13px;font-weight:600;display:inline-flex;align-items:center;gap:6px}
+.chip[aria-pressed="true"]{background:var(--accent-soft);border-color:var(--accent);color:var(--ink)}
+.legend{display:grid;gap:6px;font-size:13px}
+.legend span{display:flex;align-items:center;gap:8px}
+.legend i{width:22px;height:4px;border-radius:2px;display:inline-block}
+.empty{display:grid;place-items:center;text-align:center;gap:10px;padding:40px 16px;color:var(--muted)}
+footer.disc{font-size:12.5px;color:var(--muted);padding-block:6px 30px}
+@media (max-width:640px){nav.steps{width:100%;margin-left:0}nav.steps button{flex:1;justify-content:center;padding:7px 6px;font-size:13px;gap:4px}nav.steps button .n{display:none}.brand small{display:none}.hero>div:last-child{order:-1}}
+@media (prefers-reduced-motion: reduce){*{transition:none!important}}
+</style>
+
+<header class="top">
+  <div class="wrap">
+    <div class="brand">
+      <svg width="34" height="34" viewBox="0 0 34 34" aria-hidden="true"><rect width="34" height="34" rx="9" fill="var(--lightbox)"/><path d="M13 5 L15 16 L13 29" stroke="#e9dfc9" stroke-width="4" stroke-linecap="round" fill="none"/><path d="M21 5 L19 16 L21 29" stroke="#e9dfc9" stroke-width="4" stroke-linecap="round" fill="none" opacity=".45"/><path d="M14 5 L14 29" stroke="var(--axis)" stroke-width="1.5" stroke-dasharray="2 2"/></svg>
+      <div><b>Oyoq O'qi</b><small>MSKT bo'yicha oyoq o'qi tahlili</small></div>
+      <span class="demo-flag" id="demoFlag" hidden>Namuna</span>
+    </div>
+    <nav class="steps" role="tablist" aria-label="Bosqichlar">
+      <button role="tab" id="t-upload" aria-selected="true" data-tab="upload"><span class="n">1</span>Yuklash</button>
+      <button role="tab" id="t-points" aria-selected="false" data-tab="points"><span class="n">2</span>Nuqtalar</button>
+      <button role="tab" id="t-result" aria-selected="false" data-tab="result"><span class="n">3</span>Natija</button>
+      <button role="tab" id="t-3d" aria-selected="false" data-tab="3d"><span class="n">4</span>3D</button>
+    </nav>
+  </div>
+</header>
+
+<main class="wrap">
+  <!-- 1. YUKLASH -->
+  <section class="view" id="v-upload" role="tabpanel" aria-labelledby="t-upload">
+    <div class="hero">
+      <div class="card" style="display:grid;gap:14px">
+        <span class="eyebrow">Oyoq o'qi va deformatsiya tahlili</span>
+        <h1>MSKT faylini yuklang — oyog'ingiz normadan qancha og'ganini ko'ring</h1>
+        <p class="muted">Dastur MSKT (KT) tasvirlaridan butun oyoqning rentgenga o'xshash ko'rinishini yasaydi, asosiy nuqtalarni taklif qiladi, burchaklarni o'lchab normaga solishtiradi va oyog'ingizni 3D ko'rinishda norma bilan yonma-yon ko'rsatadi.</p>
+        <div class="howto">
+          <div><span class="eyebrow">1-qadam</span><b>ZIP faylni tanlang</b><span class="muted" style="font-size:13px">Diskdagi DICOM papkasini ZIP qilib yuklang</span></div>
+          <div><span class="eyebrow">2-qadam</span><b>Nuqtalarni tekshiring</b><span class="muted" style="font-size:13px">7 ta nuqta har bir oyoq uchun, kerak bo'lsa suring</span></div>
+          <div><span class="eyebrow">3-qadam</span><b>Natija va 3D</b><span class="muted" style="font-size:13px">Burchaklar, daraja, xavflar, norma bilan taqqoslash</span></div>
+        </div>
+        <div class="notice ok"><b>Ma'lumotlaringiz telefoningizdan chiqmaydi.</b> Barcha hisob-kitob shu qurilmaning o'zida bajariladi, fayllar hech qayerga yuborilmaydi.</div>
+      </div>
+      <div style="display:grid;gap:14px;align-content:start">
+        <label class="drop" id="drop" for="fileZip">
+          <span class="eyebrow">MSKT (KT) — DICOM ZIP</span>
+          <b style="font-size:18px">Faylni shu yerga tashlang yoki tanlang</b>
+          <span class="muted" style="font-size:14px">Butun oyoq tushirilgan seriya kerak: son-chanoq bo'g'imidan to'piqgacha. Kesim qalinligi 1–1.5 mm bo'lsa, natija aniqroq.</span>
+          <span class="btn primary">ZIP tanlash</span>
+          <input type="file" id="fileZip" accept=".zip,application/zip,application/x-zip-compressed">
+        </label>
+        <label class="drop" for="fileImg" style="padding:18px">
+          <span class="eyebrow">Yoki tik turgan holatdagi rentgen</span>
+          <span class="muted" style="font-size:14px">Butun oyoq rentgen surati (JPG/PNG). Burchaklar o'lchanadi; mm uchun kalibrlash kerak.</span>
+          <span class="btn">Rasm tanlash</span>
+          <input type="file" id="fileImg" accept="image/*">
+        </label>
+        <div class="card" id="loadCard" hidden style="display:grid;gap:10px">
+          <b id="loadTitle">O'qilmoqda…</b>
+          <div class="progress"><i id="loadBar"></i></div>
+          <span class="muted" id="loadNote" style="font-size:13px"></span>
+        </div>
+        <div id="loadMsg"></div>
+        <div class="card" id="seriesCard" hidden style="display:grid;gap:10px">
+          <b>Topilgan seriyalar</b>
+          <select id="seriesSel" class="btn" style="justify-content:flex-start"></select>
+          <button class="btn primary" id="seriesGo">Shu seriyani ochish</button>
+        </div>
+        <div class="card" id="studyCard" hidden></div>
+        <button class="btn" id="demoBtn">Namuna bemor bilan sinab ko'rish</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- 2. NUQTALAR -->
+  <section class="view" id="v-points" role="tabpanel" aria-labelledby="t-points" hidden>
+    <div class="editor">
+      <div class="side">
+        <div class="card" style="display:grid;gap:12px">
+          <div class="row" style="justify-content:space-between">
+            <div class="seg" role="group" aria-label="Oyoq">
+              <button id="legR" aria-pressed="true"><i class="dot" style="background:var(--pt-r)"></i>O'ng oyoq</button>
+              <button id="legL" aria-pressed="false"><i class="dot" style="background:var(--pt-l)"></i>Chap oyoq</button>
+            </div>
+          </div>
+          <div class="guide">
+            <svg id="miniLeg" viewBox="0 0 72 150" aria-hidden="true"></svg>
+            <div><b id="guideTitle">—</b><p class="muted" id="guideText"></p></div>
+          </div>
+          <ol class="lm-list" id="lmList"></ol>
+          <div class="row">
+            <button class="btn" id="autoBtn">Avto-taklif</button>
+            <button class="btn" id="clearBtn">Bu oyoqni tozalash</button>
+          </div>
+        </div>
+        <div class="card" style="display:grid;gap:12px">
+          <div class="live" id="liveBox"></div>
+          <button class="btn primary" id="toResult">Natijani ko'rish</button>
+        </div>
+        <div class="card" style="display:grid;gap:12px">
+          <div class="seg" role="group" aria-label="Ko'rinish" id="projSeg">
+            <button data-proj="drr" aria-pressed="true">Rentgen ko'rinishi</button>
+            <button data-proj="mip" aria-pressed="false">Suyak (MIP)</button>
+            <button data-proj="img" aria-pressed="false" hidden>Asl tasvir</button>
+            <button data-proj="edge" aria-pressed="false">Kontur</button>
+          </div>
+          <label class="slider" for="contrast">Kontrast<input type="range" id="contrast" min="0" max="100" value="50"></label>
+          <div id="calBox" hidden style="display:grid;gap:8px">
+            <b style="font-size:14px">Kalibrlash (mm uchun)</b>
+            <span class="muted" style="font-size:13px">O'lchami ma'lum obyektning (kalibrovka shari, chizg'ich) ikki chetiga bosing, so'ng haqiqiy uzunligini kiriting.</span>
+            <div class="row"><button class="btn small" id="calStart">Ikki nuqta belgilash</button><input id="calMM" class="btn small" type="number" min="1" step="0.1" value="25" style="width:90px" aria-label="Uzunlik, mm"><span class="muted">mm</span></div>
+            <span class="muted" id="calState" style="font-size:13px">Kalibrlanmagan: faqat burchaklar ko'rsatiladi.</span>
+          </div>
+        </div>
+      </div>
+      <div class="stage" id="stage">
+        <canvas id="cv"></canvas>
+        <div class="hud"><span>O'NG ◂</span><span id="hudInfo"></span><span>▸ CHAP</span></div>
+        <div class="tip" id="tip"></div>
+        <div class="tools">
+          <button id="zIn" aria-label="Kattalashtirish">+</button>
+          <button id="zOut" aria-label="Kichraytirish">−</button>
+          <button id="zFit" aria-label="Butunini ko'rsatish">⤢</button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 3. NATIJA -->
+  <section class="view" id="v-result" role="tabpanel" aria-labelledby="t-result" hidden>
+    <div id="resultBody"></div>
+  </section>
+
+  <!-- 4. 3D -->
+  <section class="view" id="v-3d" role="tabpanel" aria-labelledby="t-3d" hidden>
+    <div class="three">
+      <div class="stage" id="stage3d"><canvas id="cv3"></canvas>
+        <div class="hud"><span>O'NG ◂</span><span>OLDINDAN KO'RINISH</span><span>▸ CHAP</span></div>
+        <div class="tools">
+          <button id="v3front" aria-label="Old tomondan">O</button>
+          <button id="v3side" aria-label="Yon tomondan">Y</button>
+          <button id="v3fit" aria-label="Markazlash">⤢</button>
+        </div>
+      </div>
+      <div style="display:grid;gap:14px">
+        <div class="card" style="display:grid;gap:12px">
+          <b>Ko'rsatish</b>
+          <div class="chips" id="layerChips">
+            <button class="chip" data-layer="cloud" aria-pressed="true">KT suyaklari</button>
+            <button class="chip" data-layer="schema" aria-pressed="false">Sxema</button>
+            <button class="chip" data-layer="norm" aria-pressed="true">Norma</button>
+            <button class="chip" data-layer="axes" aria-pressed="true">O'q chiziqlari</button>
+          </div>
+          <div class="seg" role="group" aria-label="Oyoq" id="focusSeg">
+            <button data-f="both" aria-pressed="true">Ikkalasi</button>
+            <button data-f="R" aria-pressed="false">O'ng</button>
+            <button data-f="L" aria-pressed="false">Chap</button>
+          </div>
+        </div>
+        <div class="card" style="display:grid;gap:10px">
+          <b>To'g'rilangan holatni ko'rish</b>
+          <label class="slider" for="corr">Hozirgi holat → o'q to'g'rilangan holat<input type="range" id="corr" min="0" max="100" value="0"></label>
+          <span class="muted" style="font-size:13px">Boldir qismi tizza markazi atrofida burilib, son o'qining davomiga keltiriladi. Bu operatsiya rejasi emas, faqat tushunish uchun ko'rinish.</span>
+        </div>
+        <div class="card legend">
+          <span><i style="background:var(--axis)"></i>Sizning yuklama o'qingiz (son boshi → to'piq)</span>
+          <span><i style="background:var(--norm)"></i>Normal o'q: tizza markazidan o'tadi</span>
+          <span><i style="background:#e9dfc9"></i>Sizning suyaklaringiz</span>
+          <span><i style="background:var(--norm);opacity:.5"></i>Normal holatdagi oyoq (shaffof)</span>
+        </div>
+      </div>
+    </div>
+  </section>
+</main>
+<footer class="wrap disc">Oyoq O'qi — o'quv va yordamchi vosita. Tashxis qo'ymaydi va davolash rejasini almashtirmaydi; natijani ortoped-travmatolog tekshirishi shart.</footer>
+
+<script src="jszip.min.js"></script>
+<script src="dicomParser.min.js"></script>
+<script src="three.min.js"></script>
+<script>
+/* jpeg-lossless-decoder-js 2.1.2 (MIT, rii-mango) */
+(function(){
+var S=Object.defineProperty;var A=(a,t)=>{for(var e in t)S(a,e,{get:t[e],enumerable:!0})};var w={hSamp:0,quantTableSel:0,vSamp:0};var b=class{buffer;index;constructor(t,e,r){this.buffer=new Uint8Array(t,e,r),this.index=0}get16(){let t=(this.buffer[this.index]<<8)+this.buffer[this.index+1];return this.index+=2,t}get8(){let t=this.buffer[this.index];return this.index+=1,t}};var x=class{dimX=0;dimY=0;numComp=0;precision=0;components=[];read(t){let e=0,r,o=t.get16();e+=2,this.precision=t.get8(),e+=1,this.dimY=t.get16(),e+=2,this.dimX=t.get16(),e+=2,this.numComp=t.get8(),e+=1;for(let s=1;s<=this.numComp;s+=1){if(e>o)throw new Error("ERROR: frame format error");let i=t.get8();if(e+=1,e>=o)throw new Error("ERROR: frame format error [c>=Lf]");r=t.get8(),e+=1,this.components[i]||(this.components[i]={...w}),this.components[i].hSamp=r>>4,this.components[i].vSamp=r&15,this.components[i].quantTableSel=t.get8(),e+=1}if(e!==o)throw new Error("ERROR: frame format error [Lf!=count]");return 1}};var k={};A(k,{crc32:()=>L,crcTable:()=>T,createArray:()=>c,makeCRCTable:()=>y});var c=(...a)=>{if(a.length>1){let t=a[0],e=a.slice(1),r=[];for(let o=0;o<t;o++)r[o]=c(...e);return r}else return Array(a[0]).fill(void 0)},y=function(){let a,t=[];for(let e=0;e<256;e++){a=e;for(let r=0;r<8;r++)a=a&1?3988292384^a>>>1:a>>>1;t[e]=a}return t},T=y(),L=function(a){let t=new Uint8Array(a),e=-1;for(let r=0;r<t.length;r++)e=e>>>8^T[(e^t[r])&255];return(e^-1)>>>0};var p=class a{static MSB=2147483648;l;th;v;tc;constructor(){this.l=c(4,2,16),this.th=[0,0,0,0],this.v=c(4,2,16,200),this.tc=[[0,0],[0,0],[0,0],[0,0]]}read(t,e){let r=0,o,s,i,n,f,u=t.get16();for(r+=2;r<u;){if(o=t.get8(),r+=1,s=o&15,s>3)throw new Error("ERROR: Huffman table ID > 3");if(i=o>>4,i>2)throw new Error("ERROR: Huffman table [Table class > 2 ]");for(this.th[s]=1,this.tc[s][i]=1,n=0;n<16;n+=1)this.l[s][i][n]=t.get8(),r+=1;for(n=0;n<16;n+=1)for(f=0;f<this.l[s][i][n];f+=1){if(r>u)throw new Error("ERROR: Huffman table format error [count>Lh]");this.v[s][i][n][f]=t.get8(),r+=1}}if(r!==u)throw new Error("ERROR: Huffman table format error [count!=Lf]");for(n=0;n<4;n+=1)for(f=0;f<2;f+=1)this.tc[n][f]!==0&&this.buildHuffTable(e[n][f],this.l[n][f],this.v[n][f]);return 1}buildHuffTable(t,e,r){let o,s,i,n,f;for(s=0,i=0;i<8;i+=1)for(n=0;n<e[i];n+=1)for(f=0;f<256>>i+1;f+=1)t[s]=r[i][n]|i+1<<8,s+=1;for(i=1;s<256;i+=1,s+=1)t[s]=i|a.MSB;for(o=1,s=0,i=8;i<16;i+=1)for(n=0;n<e[i];n+=1){for(f=0;f<256>>i-7;f+=1)t[o*256+s]=r[i][n]|i+1<<8,s+=1;if(s>=256){if(s>256)throw new Error("ERROR: Huffman table error(1)!");s=0,o+=1}}}};var d=class a{precision=[];tq=[0,0,0,0];quantTables=c(4,64);static enhanceQuantizationTable=function(t,e){for(let r=0;r<8;r+=1)t[e[0*8+r]]*=90,t[e[4*8+r]]*=90,t[e[2*8+r]]*=118,t[e[6*8+r]]*=49,t[e[5*8+r]]*=71,t[e[1*8+r]]*=126,t[e[7*8+r]]*=25,t[e[3*8+r]]*=106;for(let r=0;r<8;r+=1)t[e[0+8*r]]*=90,t[e[4+8*r]]*=90,t[e[2+8*r]]*=118,t[e[6+8*r]]*=49,t[e[5+8*r]]*=71,t[e[1+8*r]]*=126,t[e[7+8*r]]*=25,t[e[3+8*r]]*=106;for(let r=0;r<64;r+=1)t[r]>>=6};read(t,e){let r=0,o,s,i,n=t.get16();for(r+=2;r<n;){if(o=t.get8(),r+=1,s=o&15,s>3)throw new Error("ERROR: Quantization table ID > 3");if(this.precision[s]=o>>4,this.precision[s]===0)this.precision[s]=8;else if(this.precision[s]===1)this.precision[s]=16;else throw new Error("ERROR: Quantization table precision error");if(this.tq[s]=1,this.precision[s]===8){for(i=0;i<64;i+=1){if(r>n)throw new Error("ERROR: Quantization table format error");this.quantTables[s][i]=t.get8(),r+=1}a.enhanceQuantizationTable(this.quantTables[s],e)}else{for(i=0;i<64;i+=1){if(r>n)throw new Error("ERROR: Quantization table format error");this.quantTables[s][i]=t.get16(),r+=2}a.enhanceQuantizationTable(this.quantTables[s],e)}}if(r!==n)throw new Error("ERROR: Quantization table error [count!=Lq]");return 1}};var R={acTabSel:0,dcTabSel:0,scanCompSel:0};var g=class{ah=0;al=0;numComp=0;selection=0;spectralEnd=0;components=[];read(t){let e=0,r,o,s=t.get16();for(e+=2,this.numComp=t.get8(),e+=1,r=0;r<this.numComp;r+=1){if(this.components[r]={...R},e>s)throw new Error("ERROR: scan header format error");this.components[r].scanCompSel=t.get8(),e+=1,o=t.get8(),e+=1,this.components[r].dcTabSel=o>>4,this.components[r].acTabSel=o&15}if(this.selection=t.get8(),e+=1,this.spectralEnd=t.get8(),e+=1,o=t.get8(),this.ah=o>>4,this.al=o&15,e+=1,e!==s)throw new Error("ERROR: scan header format error [count!=Ns]");return 1}};var D=function(){let a=new ArrayBuffer(2);return new DataView(a).setInt16(0,256,!0),new Int16Array(a)[0]===256}(),E=class a{static IDCT_P=[0,5,40,16,45,2,7,42,21,56,8,61,18,47,1,4,41,23,58,13,32,24,37,10,63,17,44,3,6,43,20,57,15,34,29,48,53,26,39,9,60,19,46,22,59,12,33,31,50,55,25,36,11,62,14,35,28,49,52,27,38,30,51,54];static TABLE=[0,1,5,6,14,15,27,28,2,4,7,13,16,26,29,42,3,8,12,17,25,30,41,43,9,11,18,24,31,40,44,53,10,19,23,32,39,45,52,54,20,22,33,38,46,51,55,60,21,34,37,47,50,56,59,61,35,36,48,49,57,58,62,63];static MAX_HUFFMAN_SUBTREE=50;static MSB=2147483648;static RESTART_MARKER_BEGIN=65488;static RESTART_MARKER_END=65495;buffer=null;stream=null;frame=new x;huffTable=new p;quantTable=new d;scan=new g;DU=c(10,4,64);HuffTab=c(4,2,50*256);IDCT_Source=[];nBlock=[];acTab=c(10,1);dcTab=c(10,1);qTab=c(10,1);marker=0;markerIndex=0;numComp=0;restartInterval=0;selection=0;xDim=0;yDim=0;xLoc=0;yLoc=0;outputData=null;restarting=!1;mask=0;numBytes=0;precision=void 0;components=[];getter=null;setter=null;output=null;selector=null;constructor(t,e){this.buffer=t??null,this.numBytes=e??0}decompress(t,e,r){return this.decode(t,e,r).buffer}decode(t,e,r,o){let s=0,i=[],n,f,u=[],l=[],m;t&&(this.buffer=t),o!==void 0&&(this.numBytes=o),this.stream=new b(this.buffer,e,r),this.buffer=null,this.xLoc=0,this.yLoc=0;let h=this.stream.get16();if(h!==65496)throw new Error("Not a JPEG file");for(h=this.stream.get16();h>>4!==4092||h===65476;){switch(h){case 65476:this.huffTable.read(this.stream,this.HuffTab);break;case 65484:throw new Error("Program doesn't support arithmetic coding. (format throw new IOException)");case 65499:this.quantTable.read(this.stream,a.TABLE);break;case 65501:this.restartInterval=this.readNumber()??0;break;case 65504:case 65505:case 65506:case 65507:case 65508:case 65509:case 65510:case 65511:case 65512:case 65513:case 65514:case 65515:case 65516:case 65517:case 65518:case 65519:this.readApp();break;case 65534:this.readComment();break;default:if(h>>8!==255)throw new Error("ERROR: format throw new IOException! (decode)")}h=this.stream.get16()}if(h<65472||h>65479)throw new Error("ERROR: could not handle arithmetic code!");this.frame.read(this.stream),h=this.stream.get16();do{for(;h!==65498;){switch(h){case 65476:this.huffTable.read(this.stream,this.HuffTab);break;case 65484:throw new Error("Program doesn't support arithmetic coding. (format throw new IOException)");case 65499:this.quantTable.read(this.stream,a.TABLE);break;case 65501:this.restartInterval=this.readNumber()??0;break;case 65504:case 65505:case 65506:case 65507:case 65508:case 65509:case 65510:case 65511:case 65512:case 65513:case 65514:case 65515:case 65516:case 65517:case 65518:case 65519:this.readApp();break;case 65534:this.readComment();break;default:if(h>>8!==255)throw new Error("ERROR: format throw new IOException! (Parser.decode)")}h=this.stream.get16()}switch(this.precision=this.frame.precision,this.components=this.frame.components,this.numBytes||(this.numBytes=Math.round(Math.ceil(this.precision/8))),this.numBytes===1?this.mask=255:this.mask=65535,this.scan.read(this.stream),this.numComp=this.scan.numComp,this.selection=this.scan.selection,this.numBytes===1?this.numComp===3?(this.getter=this.getValueRGB,this.setter=this.setValueRGB,this.output=this.outputRGB):(this.getter=this.getValue8,this.setter=this.setValue8,this.output=this.outputSingle):(this.getter=this.getValue8,this.setter=this.setValue8,this.output=this.outputSingle),this.selection){case 2:this.selector=this.select2;break;case 3:this.selector=this.select3;break;case 4:this.selector=this.select4;break;case 5:this.selector=this.select5;break;case 6:this.selector=this.select6;break;case 7:this.selector=this.select7;break;default:this.selector=this.select1;break}for(n=0;n<this.numComp;n+=1)f=this.scan.components[n].scanCompSel,this.qTab[n]=this.quantTable.quantTables[this.components[f].quantTableSel],this.nBlock[n]=this.components[f].vSamp*this.components[f].hSamp,this.dcTab[n]=this.HuffTab[this.scan.components[n].dcTabSel][0],this.acTab[n]=this.HuffTab[this.scan.components[n].acTabSel][1];for(this.xDim=this.frame.dimX,this.yDim=this.frame.dimY,this.numBytes===1?this.outputData=new Uint8Array(new ArrayBuffer(this.xDim*this.yDim*this.numBytes*this.numComp)):this.outputData=new Uint16Array(new ArrayBuffer(this.xDim*this.yDim*this.numBytes*this.numComp)),s+=1;;){for(u[0]=0,l[0]=0,n=0;n<10;n+=1)i[n]=1<<this.precision-1;if(this.restartInterval===0){for(h=this.decodeUnit(i,u,l);h===0&&this.xLoc<this.xDim&&this.yLoc<this.yDim;)this.output(i),h=this.decodeUnit(i,u,l);break}for(m=0;m<this.restartInterval&&(this.restarting=m===0,h=this.decodeUnit(i,u,l),this.output(i),h===0);m+=1);if(h===0&&(this.markerIndex!==0?(h=65280|this.marker,this.markerIndex=0):h=this.stream.get16()),!(h>=a.RESTART_MARKER_BEGIN&&h<=a.RESTART_MARKER_END))break}h===65500&&s===1&&(this.readNumber(),h=this.stream.get16())}while(h!==65497&&this.xLoc<this.xDim&&this.yLoc<this.yDim&&s===0);return this.outputData}decodeUnit(t,e,r){return this.numComp===1?this.decodeSingle(t,e,r):this.numComp===3?this.decodeRGB(t,e,r):-1}select1(t){return this.getPreviousX(t)}select2(t){return this.getPreviousY(t)}select3(t){return this.getPreviousXY(t)}select4(t){return this.getPreviousX(t)+this.getPreviousY(t)-this.getPreviousXY(t)}select5(t){return this.getPreviousX(t)+(this.getPreviousY(t)-this.getPreviousXY(t)>>1)}select6(t){return this.getPreviousY(t)+(this.getPreviousX(t)-this.getPreviousXY(t)>>1)}select7(t){return(this.getPreviousX(t)+this.getPreviousY(t))/2}decodeRGB(t,e,r){if(this.selector===null)throw new Error("decode hasn't run yet");let o,s,i,n,f,u,l;for(t[0]=this.selector(0),t[1]=this.selector(1),t[2]=this.selector(2),n=0;n<this.numComp;n+=1)for(i=this.qTab[n],o=this.acTab[n],s=this.dcTab[n],f=0;f<this.nBlock[n];f+=1){for(u=0;u<this.IDCT_Source.length;u+=1)this.IDCT_Source[u]=0;let m=this.getHuffmanValue(s,e,r);if(m>=65280)return m;for(t[n]=this.IDCT_Source[0]=t[n]+this.getn(r,m,e,r),this.IDCT_Source[0]*=i[0],l=1;l<64;l+=1){if(m=this.getHuffmanValue(o,e,r),m>=65280)return m;if(l+=m>>4,m&15)this.IDCT_Source[a.IDCT_P[l]]=this.getn(r,m&15,e,r)*i[l];else if(!(m>>4))break}}return 0}decodeSingle(t,e,r){if(this.selector===null)throw new Error("decode hasn't run yet");let o,s,i,n;for(this.restarting?(this.restarting=!1,t[0]=1<<this.frame.precision-1):t[0]=this.selector(),s=0;s<this.nBlock[0];s+=1){if(o=this.getHuffmanValue(this.dcTab[0],e,r),o>=65280)return o;if(i=this.getn(t,o,e,r),n=i>>8,n>=a.RESTART_MARKER_BEGIN&&n<=a.RESTART_MARKER_END)return n;t[0]+=i}return 0}getHuffmanValue(t,e,r){let o,s;if(!this.stream)throw new Error("stream not initialized");if(r[0]<8?(e[0]<<=8,s=this.stream.get8(),s===255&&(this.marker=this.stream.get8(),this.marker!==0&&(this.markerIndex=9)),e[0]|=s):r[0]-=8,o=t[e[0]>>r[0]],o&a.MSB){if(this.markerIndex!==0)return this.markerIndex=0,65280|this.marker;e[0]&=65535>>16-r[0],e[0]<<=8,s=this.stream.get8(),s===255&&(this.marker=this.stream.get8(),this.marker!==0&&(this.markerIndex=9)),e[0]|=s,o=t[(o&255)*256+(e[0]>>r[0])],r[0]+=8}if(r[0]+=8-(o>>8),r[0]<0)throw new Error("index="+r[0]+" temp="+e[0]+" code="+o+" in HuffmanValue()");return r[0]<this.markerIndex?(this.markerIndex=0,65280|this.marker):(e[0]&=65535>>16-r[0],o&255)}getn(t,e,r,o){let s,i;if(this.stream===null)throw new Error("stream not initialized");if(e===0)return 0;if(e===16)return t[0]>=0?-32768:32768;if(o[0]-=e,o[0]>=0){if(o[0]<this.markerIndex&&!this.isLastPixel())return this.markerIndex=0,(65280|this.marker)<<8;s=r[0]>>o[0],r[0]&=65535>>16-o[0]}else{if(r[0]<<=8,i=this.stream.get8(),i===255&&(this.marker=this.stream.get8(),this.marker!==0&&(this.markerIndex=9)),r[0]|=i,o[0]+=8,o[0]<0){if(this.markerIndex!==0)return this.markerIndex=0,(65280|this.marker)<<8;r[0]<<=8,i=this.stream.get8(),i===255&&(this.marker=this.stream.get8(),this.marker!==0&&(this.markerIndex=9)),r[0]|=i,o[0]+=8}if(o[0]<0)throw new Error("index="+o[0]+" in getn()");if(o[0]<this.markerIndex)return this.markerIndex=0,(65280|this.marker)<<8;s=r[0]>>o[0],r[0]&=65535>>16-o[0]}return s<1<<e-1&&(s+=(-1<<e)+1),s}getPreviousX(t=0){if(this.getter===null)throw new Error("decode hasn't run yet");return this.xLoc>0?this.getter(this.yLoc*this.xDim+this.xLoc-1,t):this.yLoc>0?this.getPreviousY(t):1<<this.frame.precision-1}getPreviousXY(t=0){if(this.getter===null)throw new Error("decode hasn't run yet");return this.xLoc>0&&this.yLoc>0?this.getter((this.yLoc-1)*this.xDim+this.xLoc-1,t):this.getPreviousY(t)}getPreviousY(t=0){if(this.getter===null)throw new Error("decode hasn't run yet");return this.yLoc>0?this.getter((this.yLoc-1)*this.xDim+this.xLoc,t):this.getPreviousX(t)}isLastPixel(){return this.xLoc===this.xDim-1&&this.yLoc===this.yDim-1}outputSingle(t){if(this.setter===null)throw new Error("decode hasn't run yet");this.xLoc<this.xDim&&this.yLoc<this.yDim&&(this.setter(this.yLoc*this.xDim+this.xLoc,this.mask&t[0]),this.xLoc+=1,this.xLoc>=this.xDim&&(this.yLoc+=1,this.xLoc=0))}outputRGB(t){if(this.setter===null)throw new Error("decode hasn't run yet");let e=this.yLoc*this.xDim+this.xLoc;this.xLoc<this.xDim&&this.yLoc<this.yDim&&(this.setter(e,t[0],0),this.setter(e,t[1],1),this.setter(e,t[2],2),this.xLoc+=1,this.xLoc>=this.xDim&&(this.yLoc+=1,this.xLoc=0))}setValue8(t,e){if(!this.outputData)throw new Error("output data not ready");D?this.outputData[t]=e:this.outputData[t]=(e&255)<<8|e>>8&255}getValue8(t){if(this.outputData===null)throw new Error("output data not ready");if(D)return this.outputData[t];{let e=this.outputData[t];return(e&255)<<8|e>>8&255}}setValueRGB(t,e,r=0){this.outputData!==null&&(this.outputData[t*3+r]=e)}getValueRGB(t,e){if(this.outputData===null)throw new Error("output data not ready");return this.outputData[t*3+e]}readApp(){if(this.stream===null)return null;let t=0,e=this.stream.get16();for(t+=2;t<e;)this.stream.get8(),t+=1;return e}readComment(){if(this.stream===null)return null;let t="",e=0,r=this.stream.get16();for(e+=2;e<r;)t+=this.stream.get8(),e+=1;return t}readNumber(){if(this.stream===null)return null;if(this.stream.get16()!==4)throw new Error("ERROR: Define number format throw new IOException [Ld!=4]");return this.stream.get16()}};globalThis.JpegLossless={Decoder:E};
+})();
+
+</script>
+<script>
+/* Oyoq O'qi — core: DICOM ZIP o'qish, proyeksiya, avto-nuqtalar, o'lchovlar, tasnif.
+ * Brauzerda ham, Node'da ham ishlaydi (testlar uchun).
+ * Koordinatalar: tasvir pikselida (x o'ngga = bemorning chap tomoni, y pastga).
+ * mm = px * mmpp. Matematik hisobda y teskari (yuqoriga musbat).
+ */
+(function (root) {
+  'use strict';
+  const DP = () => (typeof dicomParser !== 'undefined' ? dicomParser : root.dicomParser);
+  const JZ = () => (typeof JSZip !== 'undefined' ? JSZip : root.JSZip);
+
+  const UNCOMPRESSED = {
+    '1.2.840.10008.1.2': 'le',
+    '1.2.840.10008.1.2.1': 'le',
+    '1.2.840.10008.1.2.2': 'be',
+  };
+  const BONE_HU = 200;
+
+  // ---------- DICOM ----------
+  function parseDicomBytes(bytes) {
+    const dp = DP();
+    try { return dp.parseDicom(bytes); } catch (e) {
+      try { return dp.parseDicom(bytes, { TransferSyntaxUID: '1.2.840.10008.1.2' }); } catch (e2) { return null; }
+    }
+  }
+  function nums(ds, tag) {
+    const s = ds.string(tag);
+    return s ? s.split('\\').map(Number) : null;
+  }
+  function readHU(ds, bytes, rows, cols) {
+    const el = ds.elements.x7fe00010;
+    if (!el) throw new Error('nopixel');
+    const ts = ds.string('x00020010') || '1.2.840.10008.1.2';
+    let endian = UNCOMPRESSED[ts];
+    const bits = ds.uint16('x00280100') || 16;
+    let src = bytes, off = el.dataOffset, blen = el.length;
+    const JL = typeof JpegLossless !== 'undefined' ? JpegLossless : root.JpegLossless;
+    if ((ts === '1.2.840.10008.1.2.4.70' || ts === '1.2.840.10008.1.2.4.57') && JL && el.encapsulatedPixelData) {
+      const frag = DP().readEncapsulatedPixelDataFromFragments(ds, el, 0, el.fragments.length);
+      const dec = new JL.Decoder().decompress(frag.buffer, frag.byteOffset, frag.length);
+      src = new Uint8Array(dec); off = 0; blen = src.length; endian = 'le';
+    } else if (!endian || el.encapsulatedPixelData) { const e = new Error('compressed'); e.ts = ts; throw e; }
+    const signed = ds.uint16('x00280103') === 1;
+    const slope = parseFloat(ds.string('x00281053') || '1') || 1;
+    const icpt = parseFloat(ds.string('x00281052') || '0') || 0;
+    const n = rows * cols;
+    const out = new Float32Array(n);
+    const dv = new DataView(src.buffer, src.byteOffset + off, Math.min(blen, src.length - off));
+    const le = endian === 'le';
+    if (bits === 16) {
+      for (let i = 0; i < n; i++) out[i] = (signed ? dv.getInt16(i * 2, le) : dv.getUint16(i * 2, le)) * slope + icpt;
+    } else if (bits === 8) {
+      for (let i = 0; i < n; i++) out[i] = (signed ? dv.getInt8(i) : dv.getUint8(i)) * slope + icpt;
+    } else if (bits === 32) {
+      for (let i = 0; i < n; i++) out[i] = (signed ? dv.getInt32(i * 4, le) : dv.getUint32(i * 4, le)) * slope + icpt;
+    } else throw new Error('bits');
+    return out;
+  }
+
+  // Bitta kesimdan: koronar MIP qatori, DRR (rentgenga o'xshash) qatori, 3D uchun kichraytirilgan suyak maskasi
+  function processSlice(hu, cols, rows, ds) {
+    const mip = new Float32Array(cols).fill(-1024);
+    const drr = new Float32Array(cols);
+    const nx = Math.ceil(cols / ds), ny = Math.ceil(rows / ds);
+    const mask = new Uint8Array(nx * ny);
+    for (let r = 0; r < rows; r++) {
+      const off = r * cols, my = ((r / ds) | 0) * nx;
+      for (let c = 0; c < cols; c++) {
+        const v = hu[off + c];
+        if (v > mip[c]) mip[c] = v;
+        if (v > -300) drr[c] += Math.min(v + 300, 2500);
+        if (v > BONE_HU) mask[my + ((c / ds) | 0)] = 1;
+      }
+    }
+    return { mip, drr, mask, nx, ny };
+  }
+
+  async function readZip(input, onProgress) {
+    const zip = await JZ().loadAsync(input);
+    const files = Object.values(zip.files).filter(f => !f.dir && !/(^|\/)(__MACOSX|\.)/.test(f.name) && !/\.(txt|xml|htm|html|jpg|jpeg|png|pdf|exe|inf|ini|js|css)$/i.test(f.name));
+    const series = {}, localizers = [];
+    let compressed = 0, compressedTS = '', skipped = 0, done = 0;
+    for (const f of files) {
+      done++;
+      let bytes;
+      try { bytes = await f.async('uint8array'); } catch (e) { skipped++; continue; }
+      if (bytes.length < 256) { skipped++; continue; }
+      if (/\.zip$/i.test(f.name)) { skipped++; continue; }
+      const dset = parseDicomBytes(bytes);
+      if (!dset || !dset.elements.x7fe00010) { skipped++; continue; }
+      const rows = dset.uint16('x00280010'), cols = dset.uint16('x00280011');
+      const pos = nums(dset, 'x00200032'), ori = nums(dset, 'x00200037'), ps = nums(dset, 'x00280030');
+      if (!rows || !cols || !pos || !ori || !ps) { skipped++; continue; }
+      const nz = ori[0] * ori[4] - ori[1] * ori[3];
+      // Surview / topogramma: koronar (AP) proyeksiya, uzun — butun oyoq tahlili uchun yaroqli
+      const itype = (dset.string('x00080008') || '').toUpperCase();
+      if ((itype.includes('LOCALIZER') || Math.abs(nz) < 0.2) && Math.abs(ori[0]) > 0.9 && Math.abs(ori[5]) > 0.9 && rows * ps[0] > 500) {
+        try {
+          const hu = readHU(dset, bytes, rows, cols);
+          localizers.push({ hu, W: cols, H: rows, ps, flipH: ori[0] < 0, flipV: ori[5] > 0, desc: dset.string('x0008103e') || 'Surview', patient: dset.string('x00100010') || '', date: dset.string('x00080020') || '', lenmm: rows * ps[0] });
+        } catch (e) { skipped++; }
+        continue;
+      }
+      const uid = (dset.string('x0020000e') || 'nouid') + '|' + rows + 'x' + cols + '|' + (Math.abs(nz) > 0.8 ? 'ax' : 'other');
+      let s = series[uid];
+      if (!s) {
+        s = series[uid] = {
+          uid, rows, cols, axial: Math.abs(nz) > 0.8, ori, ps,
+          desc: dset.string('x0008103e') || '', modality: dset.string('x00080060') || '',
+          patient: dset.string('x00100010') || '', date: dset.string('x00080020') || '',
+          ds: Math.max(1, Math.ceil(cols / 128)), slices: [],
+        };
+      }
+      if (!s.axial) { s.slices.push({ z: pos[2] }); continue; }
+      let hu;
+      try { hu = readHU(dset, bytes, rows, cols); } catch (e) {
+        if (e.message === 'compressed') { compressed++; compressedTS = e.ts; }
+        else skipped++;
+        continue;
+      }
+      const p = processSlice(hu, cols, rows, s.ds);
+      p.z = pos[2]; p.x0 = pos[0]; p.y0 = pos[1];
+      s.slices.push(p);
+      if (onProgress && done % 8 === 0) { onProgress(done / files.length); await new Promise(r => setTimeout(r, 0)); }
+    }
+    if (onProgress) onProgress(1);
+    const list = Object.values(series).filter(s => s.axial && s.slices.length >= 20)
+      .sort((a, b) => b.slices.length - a.slices.length);
+    localizers.sort((a, b) => b.lenmm - a.lenmm);
+    return { series: list, localizers, compressed, compressedTS, skipped, total: files.length };
+  }
+
+  // Seriyadan tasvir (izotrop mm to'r) va 3D bulut yasash
+  function buildStudy(s) {
+    const sl = s.slices.slice().sort((a, b) => a.z - b.z);
+    // takroriy z ni olib tashlash
+    const uniq = [];
+    for (const x of sl) if (!uniq.length || Math.abs(x.z - uniq[uniq.length - 1].z) > 1e-3) uniq.push(x);
+    const cols = s.cols, rows = s.rows;
+    const psy = s.ps[0], psx = s.ps[1]; // PixelSpacing = [qator oralig'i, ustun oralig'i]
+    const flip = s.ori[0] < 0; // ustun bemorning o'ng tomoniga qarab o'ssa — aylantiramiz
+    const mmpp = psx;
+    const zmin = uniq[0].z, zmax = uniq[uniq.length - 1].z;
+    const W = cols, H = Math.max(2, Math.round((zmax - zmin) / mmpp) + 1);
+    const mip = new Float32Array(W * H), drr = new Float32Array(W * H);
+    let j = uniq.length - 1;
+    for (let r = 0; r < H; r++) {
+      const z = zmax - r * mmpp;
+      while (j > 0 && uniq[j - 1].z >= z) j--;
+      const hi = uniq[j], lo = uniq[Math.max(0, j - 1)];
+      const t = hi === lo || hi.z === lo.z ? 0 : (hi.z - z) / (hi.z - lo.z);
+      const t0 = Math.min(1, Math.max(0, t));
+      for (let c = 0; c < W; c++) {
+        const sc = flip ? W - 1 - c : c;
+        mip[r * W + c] = hi.mip[sc] * (1 - t0) + lo.mip[sc] * t0;
+        drr[r * W + c] = hi.drr[sc] * (1 - t0) + lo.drr[sc] * t0;
+      }
+    }
+    const mask = new Uint8Array(W * H);
+    for (let i = 0; i < W * H; i++) mask[i] = mip[i] > BONE_HU ? 1 : 0;
+    // kesim qalinligi
+    let gaps = [];
+    for (let i = 1; i < uniq.length; i++) gaps.push(uniq[i].z - uniq[i - 1].z);
+    gaps.sort((a, b) => a - b);
+    const sliceGap = gaps[gaps.length >> 1] || 0;
+    const cloud = buildCloud(uniq, s, flip, zmax, psx, psy, sliceGap);
+    return {
+      mode: 'ct', W, H, mmpp, mip, drr, mask, cloud, sliceGap, field: mip, thr: BONE_HU,
+      info: { desc: s.desc, patient: s.patient, date: s.date, slices: uniq.length, cols, rows, psx, sliceGap },
+    };
+  }
+
+  function buildCloud(uniq, s, flip, zmax, psx, psy, sliceGap) {
+    const ds = s.ds, nx = uniq[0].nx, ny = uniq[0].ny;
+    const step = Math.max(1, Math.round((ds * psx) / Math.max(0.3, sliceGap)));
+    const sel = uniq.filter((_, i) => i % step === 0);
+    const nz = sel.length, pts = [];
+    const at = (i, j, k) => (i < 0 || j < 0 || k < 0 || i >= nx || j >= ny || k >= nz) ? 0 : sel[k].mask[j * nx + i];
+    const yc = (s.rows * psy) / 2;
+    for (let k = 0; k < nz; k++) for (let j = 0; j < ny; j++) for (let i = 0; i < nx; i++) {
+      if (!at(i, j, k)) continue;
+      if (at(i + 1, j, k) && at(i - 1, j, k) && at(i, j + 1, k) && at(i, j - 1, k) && at(i, j, k + 1) && at(i, j, k - 1)) continue;
+      let X = (i * ds + ds / 2) * psx;
+      if (flip) X = s.cols * psx - X;
+      pts.push(X, sel[k].z - zmax, (j * ds + ds / 2) * psy - yc);
+    }
+    let arr = new Float32Array(pts);
+    const maxPts = 220000;
+    if (arr.length / 3 > maxPts) {
+      const keep = maxPts / (arr.length / 3), out = [];
+      for (let p = 0; p < arr.length; p += 3) if (Math.random() < keep) out.push(arr[p], arr[p + 1], arr[p + 2]);
+      arr = new Float32Array(out);
+    }
+    return arr;
+  }
+
+  // ---------- Rentgen tasviri ----------
+  function otsu(gray) {
+    const hist = new Float64Array(256);
+    for (let i = 0; i < gray.length; i++) hist[Math.min(255, Math.max(0, (gray[i] * 255) | 0))]++;
+    let sum = 0; for (let i = 0; i < 256; i++) sum += i * hist[i];
+    let sB = 0, wB = 0, best = 0, th = 128; const total = gray.length;
+    for (let t = 0; t < 256; t++) {
+      wB += hist[t]; if (!wB) continue; const wF = total - wB; if (!wF) break;
+      sB += t * hist[t]; const mB = sB / wB, mF = (sum - sB) / wF, v = wB * wF * (mB - mF) * (mB - mF);
+      if (v > best) { best = v; th = t; }
+    }
+    return th / 255;
+  }
+  function studyFromGray(gray, W, H) {
+    // suyak — yorug'roq qism; Otsu'ni ikki marta qo'llaymiz (yumshoq to'qima va suyakni ajratish)
+    const t1 = otsu(gray);
+    const hi = gray.filter(v => v > t1);
+    const t2 = hi.length > 100 ? otsu(hi) : t1;
+    const mask = new Uint8Array(W * H);
+    for (let i = 0; i < W * H; i++) mask[i] = gray[i] > t2 ? 1 : 0;
+    return { mode: 'xr', W, H, mmpp: null, img: gray, mask, cloud: null, info: {}, field: gray, thr: t2 };
+  }
+
+  // Surview'dan tasvir: vertikal masshtab aniq (stol harakati), gorizontal — taxminan (±5%)
+  function studyFromLocalizer(L) {
+    const { W, H, hu } = L, n = W * H, gray = new Float32Array(n);
+    const smp = []; for (let i = 0; i < n; i += 13) smp.push(hu[i]); smp.sort((a, b) => a - b);
+    const lo = smp[Math.floor(smp.length * 0.01)], hi = smp[Math.floor(smp.length * 0.998)];
+    for (let y = 0; y < H; y++) for (let x = 0; x < W; x++) {
+      const sy = L.flipV ? H - 1 - y : y, sx = L.flipH ? W - 1 - x : x;
+      gray[y * W + x] = Math.max(0, Math.min(1, (hu[sy * W + sx] - lo) / (hi - lo)));
+    }
+    const st = studyFromGray(gray, W, H);
+    st.mmpp = L.ps[1]; st.localizer = true;
+    st.info = { desc: L.desc, patient: L.patient, date: L.date, localizer: true, lenmm: L.lenmm, psRow: L.ps[0], psCol: L.ps[1] };
+    return st;
+  }
+
+  // ---------- Avto-taklif nuqtalar ----------
+  function largestRun(mask, W, y, x0, x1) {
+    let best = null, a = -1;
+    for (let x = x0; x <= x1; x++) {
+      const b = x < x1 && mask[y * W + x];
+      if (b && a < 0) a = x;
+      if (!b && a >= 0) { if (!best || x - a > best[1] - best[0]) best = [a, x - 1]; a = -1; }
+    }
+    return best;
+  }
+  function smooth(arr, w) {
+    const out = new Float32Array(arr.length);
+    for (let i = 0; i < arr.length; i++) {
+      let s = 0, n = 0;
+      for (let k = -w; k <= w; k++) { const j = i + k; if (j >= 0 && j < arr.length) { s += arr[j]; n++; } }
+      out[i] = s / n;
+    }
+    return out;
+  }
+  function jointGap(cnt, y0, y1, flank, topmost) {
+    let best = -1, bs = Infinity; const sc = [];
+    for (let y = Math.max(0, y0); y <= Math.min(cnt.length - 1, y1); y++) {
+      let up = 0, dn = 0;
+      for (let k = 2; k <= flank; k++) { up = Math.max(up, cnt[y - k] || 0); dn = Math.max(dn, cnt[y + k] || 0); }
+      const v = cnt[y] / (Math.min(up, dn) + 1);
+      sc.push([y, v]);
+      if (v < bs) { bs = v; best = y; }
+    }
+    if (topmost) for (const [y, v] of sc) if (v <= Math.max(0.15, bs * 1.5)) return y;
+    return best;
+  }
+  function scanEdge(st, x, yStart, dir) {
+    const { mask, W, H, field, thr } = st;
+    let y = Math.round(yStart); x = Math.round(x);
+    // avval suyakni topamiz, keyin chekkasigacha yuramiz
+    let guard = 0;
+    while (y > 0 && y < H - 1 && !mask[y * W + x] && guard++ < 80) y -= dir;
+    while (y > 0 && y < H - 1 && mask[(y + dir) * W + x]) y += dir;
+    if (field) { // subpiksel: chegara qiymati kesishgan joy
+      const a = field[y * W + x], b = field[(y + dir) * W + x];
+      if (a !== b) y += dir * Math.max(0, Math.min(1, (a - thr) / (a - b)));
+    }
+    return y;
+  }
+
+  // son boshi: taxminiy nuqta atrofida eng zich (son boshi + kosa) dog'ni qidiramiz
+  function refineHip(st, g, px) {
+    const f = st.drr || st.img; if (!f) return g;
+    const { W, H } = st, R = px(40), r = px(16);
+    const x0 = Math.max(0, Math.round(g[0] - R - r)), x1 = Math.min(W - 1, Math.round(g[0] + R + r));
+    const y0 = Math.max(0, Math.round(g[1] - R - r)), y1 = Math.min(H - 1, Math.round(g[1] + R + r));
+    const w = x1 - x0 + 1, h = y1 - y0 + 1, I = new Float64Array((w + 1) * (h + 1));
+    for (let y = 0; y < h; y++) for (let x = 0; x < w; x++)
+      I[(y + 1) * (w + 1) + x + 1] = f[(y + y0) * W + x + x0] + I[y * (w + 1) + x + 1] + I[(y + 1) * (w + 1) + x] - I[y * (w + 1) + x];
+    const box = (cx, cy) => { const a = cx - r, b = cy - r, c = cx + r + 1, d = cy + r + 1; return I[d * (w + 1) + c] - I[b * (w + 1) + c] - I[d * (w + 1) + a] + I[b * (w + 1) + a]; };
+    let best = -Infinity, bx = g[0], by = g[1];
+    for (let cy = r; cy < h - r - 1; cy++) for (let cx = r; cx < w - r - 1; cx++) {
+      const dx = cx + x0 - g[0], dy = cy + y0 - g[1]; if (dx * dx + dy * dy > R * R) continue;
+      const v = box(cx, cy); if (v > best) { best = v; bx = cx + x0; by = cy + y0; }
+    }
+    return [bx, by];
+  }
+
+  function autoLandmarks(st) {
+    const { W, H, mask } = st;
+    const mm = st.mmpp || (1000 / H); // kalibrlanmagan rentgen uchun taxmin
+    const px = v => Math.max(1, Math.round(v / mm));
+    // o'rta chiziq
+    const colCnt = new Float32Array(W);
+    for (let y = Math.round(H * 0.4); y < Math.round(H * 0.8); y++) for (let x = 0; x < W; x++) colCnt[x] += mask[y * W + x];
+    const cs = smooth(colCnt, px(4));
+    let mid = Math.round(W / 2), mv = Infinity;
+    for (let x = Math.round(W * 0.3); x < W * 0.7; x++) {
+      const v = cs[x] + Math.abs(x - W / 2) * 0.001;
+      if (v < mv) { mv = v; mid = x; }
+    }
+    const out = {};
+    const legs = [['R', 0, mid], ['L', mid, W]];
+    for (const [side, x0, x1] of legs) {
+      const rowCnt = new Float32Array(H);
+      for (let y = 0; y < H; y++) { let c = 0; for (let x = x0; x < x1; x++) c += mask[y * W + x]; rowCnt[y] = c; }
+      let yTop = 0, yBot = H - 1;
+      while (yTop < H && rowCnt[yTop] === 0) yTop++;
+      while (yBot > 0 && rowCnt[yBot] === 0) yBot--;
+      if (yBot - yTop < px(300)) continue; // bu tomonda oyoq yo'q
+      const span = yBot - yTop;
+      const cnt = smooth(rowCnt, 1);
+      const flank = px(35);
+      const yK = jointGap(cnt, yTop + Math.round(span * 0.35), yTop + Math.round(span * 0.75), flank);
+      // to'piq: boldir tanasi markazi atrofidagi tor oynada eng yuqori bo'g'im tirqishi
+      // boldir tanasi markazini qatorma-qator kuzatib boramiz (boldir qiyshiq bo'lishi mumkin)
+      const yS1 = yK + Math.round((yBot - yK) * 0.45);
+      const r1 = largestRun(mask, W, yS1, x0, x1) || [x0, x1 - 1];
+      let cx = (r1[0] + r1[1]) / 2;
+      const hw = px(14), hw2 = px(25), centers = new Float32Array(H).fill(-1);
+      const narrow = new Float32Array(H);
+      for (let y = yS1; y <= yBot; y++) {
+        const run = largestRun(mask, W, y, Math.max(x0, Math.round(cx - hw2)), Math.min(x1, Math.round(cx + hw2)));
+        if (run && run[1] - run[0] >= px(8)) cx = 0.8 * cx + 0.2 * (run[0] + run[1]) / 2;
+        centers[y] = cx;
+        let c = 0; for (let x = Math.max(x0, Math.round(cx - hw)); x < Math.min(x1, Math.round(cx + hw)); x++) c += mask[y * W + x]; narrow[y] = c;
+      }
+      const yA = jointGap(smooth(narrow, 1), yK + Math.round((yBot - yK) * 0.75), yBot - px(8), px(15), true);
+      const med = side === 'R' ? 1 : -1;
+      // tizza: son suyagi kondillari
+      const fr = largestRun(mask, W, Math.max(0, yK - px(12)), x0, x1) || [x0, x1 - 1];
+      const tr = largestRun(mask, W, Math.min(H - 1, yK + px(12)), x0, x1) || fr;
+      const fx = [fr[0] + 0.15 * (fr[1] - fr[0]), fr[0] + 0.85 * (fr[1] - fr[0])];
+      const tx = [tr[0] + 0.15 * (tr[1] - tr[0]), tr[0] + 0.85 * (tr[1] - tr[0])];
+      const f1 = [fx[0], scanEdge(st, fx[0], yK - px(25), 1)];
+      const f2 = [fx[1], scanEdge(st, fx[1], yK - px(25), 1)];
+      const t1 = [tx[0], scanEdge(st, tx[0], yK + px(25), -1)];
+      const t2 = [tx[1], scanEdge(st, tx[1], yK + px(25), -1)];
+      // to'piq
+      const acx = centers[Math.max(0, yA - px(15))] > 0 ? centers[Math.max(0, yA - px(15))] : (x0 + x1) / 2;
+      const ax = [acx - px(12), acx + px(12)];
+      const a1 = [ax[0], scanEdge(st, ax[0], yA - px(20), 1)];
+      const a2 = [ax[1], scanEdge(st, ax[1], yA - px(20), 1)];
+      // son boshi: proporsiya bo'yicha taxmin
+      const kx = (fx[0] + fx[1] + tx[0] + tx[1]) / 4;
+      const tibLen = yA - yK;
+      const yH = Math.max(yTop + px(10), Math.round(yK - tibLen * 1.2));
+      const hip = refineHip(st, [kx - med * 0.08 * (yK - yH), yH], px);
+      out[side] = { hip, f1, f2, t1, t2, a1, a2 };
+    }
+    return out;
+  }
+
+  // ---------- Geometriya ----------
+  const sub = (a, b) => [a[0] - b[0], a[1] - b[1]];
+  const mid2 = (a, b) => [(a[0] + b[0]) / 2, (a[1] + b[1]) / 2];
+  const len = v => Math.hypot(v[0], v[1]);
+  const ang = (u, v) => Math.acos(Math.max(-1, Math.min(1, (u[0] * v[0] + u[1] * v[1]) / (len(u) * len(v))))) * 180 / Math.PI;
+  const rot = (v, deg) => { const a = deg * Math.PI / 180, c = Math.cos(a), s = Math.sin(a); return [v[0] * c - v[1] * s, v[0] * s + v[1] * c]; };
+
+  const KEYS = ['hip', 'f1', 'f2', 't1', 't2', 'a1', 'a2'];
+
+  // nuqtalarni matematik (mm, y yuqoriga) koordinataga o'tkazish va medial/lateralni ajratish
+  function legGeometry(p, side, mmpp) {
+    const s = mmpp || 1, m = q => [q[0] * s, -q[1] * s];
+    const med = side === 'R' ? 1 : -1;
+    const ml = (a, b) => (a[0] * med >= b[0] * med ? [a, b] : [b, a]); // [medial, lateral]
+    const H = m(p.hip);
+    const [fm, fl] = ml(m(p.f1), m(p.f2));
+    const [tm, tl] = ml(m(p.t1), m(p.t2));
+    const [am, al] = ml(m(p.a1), m(p.a2));
+    const Kf = mid2(fm, fl), Kt = mid2(tm, tl), Kc = mid2(Kf, Kt), Ac = mid2(am, al);
+    return { H, fm, fl, tm, tl, am, al, Kf, Kt, Kc, Ac, med };
+  }
+
+  function measureLeg(p, side, mmpp) {
+    if (!KEYS.every(k => p && p[k])) return null;
+    const g = legGeometry(p, side, mmpp);
+    const { H, fm, fl, tm, tl, am, al, Kf, Kt, Kc, Ac, med } = g;
+    const mLDFA = ang(sub(H, Kf), sub(fl, fm));
+    const mMPTA = ang(sub(Ac, Kt), sub(tm, tl));
+    const LDTA = ang(sub(Kt, Ac), sub(al, am));
+    let jl = ang(sub(fl, fm), sub(tl, tm));
+    const gapM = fm[1] - tm[1], gapL = fl[1] - tl[1];
+    const JLCA = (gapL >= gapM ? 1 : -1) * jl;
+    const xl = H[0] + (Ac[0] - H[0]) * (Kc[1] - H[1]) / (Ac[1] - H[1]);
+    const madMed = (xl - Kc[0]) * med; // + : o'q tizza markazidan medialda o'tadi
+    const hkaAbs = ang(sub(Kf, H), sub(Ac, Kt));
+    // ishorani geometriyadan: tizza markazi H–A chizig'iga nisbatan lateralda bo'lsa — varus
+    const HKA = (madMed >= 0 ? 1 : -1) * hkaAbs;
+    const femur = len(sub(H, Kf)), tibia = len(sub(Kt, Ac)), limb = len(sub(H, Ac));
+    const cal = !!mmpp;
+    return {
+      side, mLDFA, mMPTA, LDTA, JLCA, HKA,
+      MAD: cal ? madMed : null,
+      femur: cal ? femur : null, tibia: cal ? tibia : null, limb: cal ? limb : null,
+      geo: g,
+    };
+  }
+
+  // ---------- Normalar va tasnif ----------
+  // Manba: Paley D. Principles of Deformity Correction (2002); Moreland JR va hamm. JBJS Am 1987.
+  const NORMS = {
+    HKA: { lo: -2, hi: 3, mean: '1.3° varus ± 2°', unit: '°' },
+    mLDFA: { lo: 85, hi: 90, mean: '87.5° (85–90°)', unit: '°' },
+    mMPTA: { lo: 85, hi: 90, mean: '87.5° (85–90°)', unit: '°' },
+    JLCA: { lo: -2, hi: 2, mean: '0–2°', unit: '°' },
+    LDTA: { lo: 86, hi: 92, mean: '89° (86–92°)', unit: '°' },
+    MAD: { lo: 0, hi: 15, mean: '8 ± 7 mm medial', unit: 'mm' },
+  };
+
+  function inNorm(key, v) { const n = NORMS[key]; return v == null ? null : v >= n.lo && v <= n.hi; }
+
+  function classify(m) {
+    if (!m) return null;
+    const dev = m.HKA; // + varus, − valgus
+    let type = 'norma', grade = 0;
+    if (dev > NORMS.HKA.hi || dev < NORMS.HKA.lo) {
+      type = dev > 0 ? 'varus' : 'valgus';
+      const a = Math.abs(dev);
+      grade = a <= 5 ? 1 : a <= 10 ? 2 : 3;
+    }
+    const where = [];
+    if (!inNorm('mLDFA', m.mLDFA)) where.push({ k: 'femur', txt: m.mLDFA > 90 ? 'son suyagi pastki qismi — varus' : 'son suyagi pastki qismi — valgus', corr: m.mLDFA - 87.5 });
+    if (!inNorm('mMPTA', m.mMPTA)) where.push({ k: 'tibia', txt: m.mMPTA < 85 ? 'katta boldir suyagi yuqori qismi — varus' : 'katta boldir suyagi yuqori qismi — valgus', corr: 87.5 - m.mMPTA });
+    if (Math.abs(m.JLCA) > 2) where.push({ k: 'joint', txt: m.JLCA > 0 ? 'bo\'g\'im ichi: tashqi tomon ochilgan (boylam bo\'shligi yoki ichki tog\'ay yemirilishi)' : 'bo\'g\'im ichi: ichki tomon ochilgan', corr: m.JLCA });
+    if (!inNorm('LDTA', m.LDTA)) where.push({ k: 'ankle', txt: 'katta boldir pastki qismi (to\'piq usti)', corr: m.LDTA - 89 });
+    return { type, grade, dev, where, gradeName: ['Norma', 'Yengil', 'O\'rta', 'Og\'ir'][grade] };
+  }
+
+  // Xavflar: umumiy ilmiy bog'liqliklar asosida, shaxsiy bashorat emas
+  function risks(m, cls, lld) {
+    const r = [];
+    if (!m || !cls) return r;
+    const a = Math.abs(m.HKA);
+    const lvl = a > 10 ? 3 : a > 5 ? 2 : 1;
+    if (cls.type === 'varus') {
+      r.push({ lvl, t: 'Tizzaning ichki qismida artroz', d: 'Og\'irlik tizzaning ichki (medial) bo\'limiga ko\'proq tushadi. Tadqiqotlarda varus o\'q mavjud medial artrozning tezroq rivojlanishi bilan bog\'liq.' });
+      r.push({ lvl: Math.max(1, lvl - 1), t: 'Ichki meniskning zo\'riqishi', d: 'Ichki menisk va tog\'ayga doimiy ortiqcha bosim yemirilishni tezlashtirishi mumkin.' });
+      if (m.JLCA > 2 || a > 8) r.push({ lvl: 2, t: 'Tashqi boylamlarning cho\'zilishi', d: 'Yurganda tizzaning tashqariga "silkinishi" (lateral thrust) va beqarorlik hissi paydo bo\'lishi mumkin.' });
+      r.push({ lvl: 1, t: 'To\'piq va oyoq panjasida kompensatsiya', d: 'Uzoq muddatda to\'piq osti bo\'g\'imida moslashuvchan o\'zgarishlar kuzatilishi mumkin.' });
+    } else if (cls.type === 'valgus') {
+      r.push({ lvl, t: 'Tizzaning tashqi qismida artroz', d: 'Og\'irlik tashqi (lateral) bo\'limga ko\'proq tushadi, tashqi tog\'ay tezroq yemirilishi mumkin.' });
+      r.push({ lvl: Math.max(1, lvl - 1), t: 'Tizza qopqog\'i (patella) beqarorligi', d: 'Valgusda patellaning tashqariga siljishi va old tizza og\'rig\'i ko\'proq uchraydi.' });
+      r.push({ lvl: 1, t: 'Ichki boylamga yuklama va yassi oyoqlik', d: 'Ichki yon boylam zo\'riqadi, oyoq panjasi ichkariga yotishi kuchayishi mumkin.' });
+    }
+    if (lld && Math.abs(lld) >= 10) {
+      const L = Math.abs(lld) >= 20 ? 2 : 1;
+      r.push({ lvl: L, t: 'Oyoqlar uzunligi farqi oqibatlari', d: 'Tos qiyshayishi, umurtqaning funksional qiyshayishi, bel va son-chanoq bo\'g\'imi og\'rig\'i, yurishning o\'zgarishi.' });
+    }
+    return r;
+  }
+
+  // ---------- Demo: sintetik KT (o'ng — tibial varus, chap — deyarli norma) ----------
+  const DEMO_DESIGN = {
+    R: { hipX: 100, phi: 3, Lf: 445, mLDFA: 88, JLCA: 2.5, mMPTA: 81.5, Lt: 360, LDTA: 89 },
+    L: { hipX: 330, phi: 3, Lf: 448, mLDFA: 87.5, JLCA: 0.8, mMPTA: 87, Lt: 372, LDTA: 89 },
+  };
+  function demoLegGeometry(d, side, hipZ) {
+    const med = side === 'R' ? 1 : -1;
+    const H = [d.hipX, hipZ];
+    const df = [med * Math.sin(d.phi * Math.PI / 180), -Math.cos(d.phi * Math.PI / 180)];
+    const Kf = [H[0] + d.Lf * df[0], H[1] + d.Lf * df[1]];
+    const upf = [-df[0], -df[1]];
+    const Lfv = rot(upf, med * d.mLDFA);
+    const ut = rot(Lfv, med * d.JLCA);
+    const Kt = [Kf[0], Kf[1] - 6];
+    const mt = [-ut[0], -ut[1]];
+    const dt = rot(mt, -med * d.mMPTA);
+    const Ac = [Kt[0] + d.Lt * dt[0], Kt[1] + d.Lt * dt[1]];
+    const upt = [-dt[0], -dt[1]];
+    const va = rot(upt, med * d.LDTA);
+    return { med, H, Kf, Kt, Ac, Lfv, ut, dt, upf, upt, va };
+  }
+
+  function makeDemoSlices(opts) {
+    opts = opts || {};
+    if (opts.async) return makeDemoAsync(opts);
+    const psx = 1.5, cols = 293, rows = 147, dz = 2, hipZ = 940;
+    const yc = rows * psx / 2;
+    const legs = ['R', 'L'].map(s => demoLegGeometry(DEMO_DESIGN[s], s, hipZ));
+    const dot = (a, b) => a[0] * b[0] + a[1] * b[1];
+    const perpDown = u => { let n = [-u[1], u[0]]; if (n[1] > 0) n = [-n[0], -n[1]]; return n; };
+    // primitivlar: {lo, hi (z oralig'i), hu, f(x, dy, z) => bool}
+    const P = [];
+    const capsule = (a, b, r, hu, dyc = 0) => {
+      const ab = sub(b, a), l2 = dot(ab, ab);
+      P.push({ lo: Math.min(a[1], b[1]) - r, hi: Math.max(a[1], b[1]) + r, hu, f: (x, dy, z) => {
+        const t = Math.max(0, Math.min(1, ((x - a[0]) * ab[0] + (z - a[1]) * ab[1]) / l2));
+        const ex = x - a[0] - ab[0] * t, ez = z - a[1] - ab[1] * t, ey = dy - dyc;
+        return ex * ex + ez * ez + ey * ey < r * r; } });
+    };
+    const block = (o, u, v, u0, u1, v0, v1, dy0, dy1, hu) => { // o — markaz, u/v — birlik vektorlar
+      const cs = [[u0, v0], [u1, v0], [u0, v1], [u1, v1]].map(([a, b]) => o[1] + u[1] * a + v[1] * b);
+      P.push({ lo: Math.min(...cs), hi: Math.max(...cs), hu, f: (x, dy, z) => {
+        if (dy < dy0 || dy > dy1) return false;
+        const qx = x - o[0], qz = z - o[1], a = qx * u[0] + qz * u[1], b = qx * v[0] + qz * v[1];
+        return a >= u0 && a <= u1 && b >= v0 && b <= v1; } });
+    };
+    const sphere = (c, r, hu, dyc = 0, shell = 0, zcut = -1e9) => P.push({ lo: c[1] - r, hi: c[1] + r, hu, f: (x, dy, z) => {
+      if (z < zcut) return false;
+      const d2 = (x - c[0]) ** 2 + (z - c[1]) ** 2 + (dy - dyc) ** 2; return d2 < r * r && d2 >= shell * shell; } });
+    for (const g of legs) {
+      const lat = -g.med;
+      sphere(g.H, 23, 900);
+      sphere(g.H, 33, 600, 0, 27, g.H[1] - 4);
+      const Tr = [g.H[0] + lat * 45, g.H[1] - 40];
+      capsule(g.H, Tr, 14, 800);
+      sphere(Tr, 18, 700);
+      capsule(Tr, [g.Kf[0] + g.upf[0] * 55, g.Kf[1] + g.upf[1] * 55], 15, 1100);
+      block(g.Kf, g.Lfv, g.upf, -40, 40, 0, 55, -32, 32, 700);
+      const pc = [g.Kf[0] + g.upf[0] * 38, g.Kf[1] + g.upf[1] * 38];
+      P.push({ lo: pc[1] - 22, hi: pc[1] + 22, hu: 650, f: (x, dy, z) => ((x - pc[0]) / 21) ** 2 + ((z - pc[1]) / 22) ** 2 + ((dy + 44) / 10) ** 2 < 1 });
+      block(g.Kt, g.ut, perpDown(g.ut), -38, 38, 0, 40, -30, 30, 700);
+      capsule([g.Kt[0] + g.dt[0] * 35, g.Kt[1] + g.dt[1] * 35], [g.Ac[0] - g.dt[0] * 30, g.Ac[1] - g.dt[1] * 30], 13, 1100);
+      block(g.Ac, g.va, g.upt, -22, 22, 0, 32, -20, 20, 700);
+      block(g.Ac, g.va, g.upt, -16, 16, -32, -4, -18, 18, 650);
+      block(g.Ac, g.va, g.upt, -20, 20, -70, -35, -70, 30, 500);
+      capsule([g.Kt[0] + g.ut[0] * 30 + g.dt[0] * 22, g.Kt[1] + g.ut[1] * 30 + g.dt[1] * 22], [g.Ac[0] + lat * 27, g.Ac[1] - 12], 6, 900, 10);
+    }
+    // chanoq plastinkasi
+    P.push({ lo: hipZ + 15, hi: hipZ + 110, hu: 500, f: (x, dy) => x > legs[0].H[0] - 25 && x < legs[1].H[0] + 25 && Math.abs(dy - 5) < 9 });
+    const slices = [];
+    const ds = Math.max(1, Math.ceil(cols / 128));
+    const hu = new Float32Array(rows * cols);
+    const lerpX = (a, b, z) => (z <= Math.max(a[1], b[1]) && z >= Math.min(a[1], b[1])) ? a[0] + (b[0] - a[0]) * (z - a[1]) / (b[1] - a[1]) : null;
+    const zs = []; for (let z = -40; z <= 1060; z += dz) zs.push(z);
+    const doSlice = z => {
+      hu.fill(-1000);
+      const act = P.filter(p => z >= p.lo && z <= p.hi);
+      // yumshoq to'qima: son/boldir o'qi atrofida silindr
+      const soft = [];
+      for (const g of legs) {
+        const tx = lerpX(g.H, g.Kf, z), cx = lerpX(g.Kt, g.Ac, z);
+        if (tx != null) soft.push([tx, 68]);
+        else if (cx != null) soft.push([cx, 50]);
+        else if (z > g.Kt[1] - 20 && z < g.Kf[1] + 20) soft.push([g.Kf[0], 58]);
+        else if (z <= g.Ac[1] && z > g.Ac[1] - 90) soft.push([g.Ac[0], 60]);
+      }
+      const pelvisSoft = z > hipZ - 40 && z < hipZ + 120;
+      for (let r = 0; r < rows; r++) {
+        const dy = (r + 0.5) * psx - yc;
+        for (let c = 0; c < cols; c++) {
+          const x = (c + 0.5) * psx;
+          let v = -1000;
+          if (pelvisSoft && Math.abs(dy) < 90 && x > 20 && x < 420) v = 40;
+          else for (const [sx, R] of soft) if ((x - sx) ** 2 + dy * dy < R * R) { v = 40; break; }
+          if (v > -1000) for (const p of act) if (p.f(x, dy, z)) { v = p.hu; break; }
+          hu[r * cols + c] = v;
+        }
+      }
+      const p = processSlice(hu, cols, rows, ds);
+      p.z = z;
+      if (opts.keepRaw) p.raw = Int16Array.from(hu);
+      slices.push(p);
+    };
+    const result = () => ({ uid: 'demo', rows, cols, ori: [1, 0, 0, 0, 1, 0], ps: [psx, psx], ds, slices, desc: 'Namuna (sintetik)', patient: 'Namuna bemor', date: '' });
+    if (opts._async) return { zs, doSlice, result };
+    zs.forEach(doSlice);
+    return result();
+  }
+  async function makeDemoAsync(opts) {
+    const g = makeDemoSlices(Object.assign({}, opts, { async: false, _async: true }));
+    for (let i = 0; i < g.zs.length; i++) {
+      g.doSlice(g.zs[i]);
+      if (i % 12 === 0) { if (opts.onProgress) opts.onProgress(i / g.zs.length); await new Promise(r => setTimeout(r, 0)); }
+    }
+    return g.result();
+  }
+
+  // Hisobot matni
+  function reportText(res) {
+    const f = v => v == null ? '—' : v.toFixed(1);
+    const lines = ['OYOQ O\'QI — o\'lchov natijalari (taxminiy, shifokor tasdig\'i talab qilinadi)', ''];
+    for (const s of ['R', 'L']) {
+      const m = res[s]; if (!m) continue;
+      const c = classify(m);
+      lines.push((s === 'R' ? 'O\'NG' : 'CHAP') + ' OYOQ: ' + (c.type === 'norma' ? 'norma doirasida' : c.type.toUpperCase() + ' ' + Math.abs(m.HKA).toFixed(1) + '°, daraja: ' + c.gradeName));
+      lines.push('  HKA ' + f(m.HKA) + '° (+varus) | MAD ' + f(m.MAD) + ' mm medial | mLDFA ' + f(m.mLDFA) + '° | mMPTA ' + f(m.mMPTA) + '° | JLCA ' + f(m.JLCA) + '° | LDTA ' + f(m.LDTA) + '°');
+      if (m.limb) lines.push('  Uzunlik (son boshi–to\'piq markazi): ' + f(m.limb) + ' mm (son ' + f(m.femur) + ', boldir ' + f(m.tibia) + ')');
+      for (const w of c.where) lines.push('  • ' + w.txt + ' (' + (w.corr > 0 ? '+' : '') + w.corr.toFixed(1) + '°)');
+    }
+    if (res.R && res.L && res.R.limb && res.L.limb) lines.push('', 'Uzunlik farqi: ' + Math.abs(res.R.limb - res.L.limb).toFixed(1) + ' mm (' + (res.R.limb < res.L.limb ? 'o\'ng' : 'chap') + ' qisqa)');
+    lines.push('', 'Eslatma: KT yotgan holatda olinadi; tik turgan holatdagi rentgenda varus odatda kattaroq ko\'rinadi.');
+    return lines.join('\n');
+  }
+
+  const api = {
+    readZip, buildStudy, studyFromGray, studyFromLocalizer, autoLandmarks, measureLeg, legGeometry, classify, risks,
+    makeDemoSlices, demoLegGeometry, DEMO_DESIGN, NORMS, KEYS, inNorm, reportText, rot, BONE_HU,
+  };
+  root.OyoqCore = api;
+  if (typeof module !== 'undefined' && module.exports) module.exports = api;
+})(typeof window !== 'undefined' ? window : globalThis);
+
+</script>
+<script>
+(() => {
+  'use strict';
+  const C = window.OyoqCore;
+  const $ = id => document.getElementById(id);
+  const KEYS = C.KEYS;
+  const LM = {
+    hip: { s: 'Son boshi', t: 'Son suyagi boshining markazi', d: 'Son-chanoq bo\'g\'imidagi yumaloq son suyagi boshining aynan o\'rtasiga bosing. Kattalashtirib, aylananing markazini toping.' },
+    f1: { s: 'Son kondili ①', t: 'Son kondillari — pastki nuqtalar', d: 'Tizzada son suyagining ichki va tashqi bo\'rtiqlari (kondillar) eng pastki nuqtasiga bittadan nuqta qo\'ying.' },
+    f2: { s: 'Son kondili ②', t: 'Son kondillari — pastki nuqtalar', d: 'Ikkinchi kondilning eng pastki nuqtasi. Tartib muhim emas — dastur ichki va tashqini o\'zi ajratadi.' },
+    t1: { s: 'Boldir platosi ①', t: 'Katta boldir platosi', d: 'Tizza tirqishidan pastdagi katta boldir suyagi yuqori yuzasining ichki va tashqi chetlari.' },
+    t2: { s: 'Boldir platosi ②', t: 'Katta boldir platosi', d: 'Platoning ikkinchi cheti.' },
+    a1: { s: 'To\'piq ①', t: 'To\'piq bo\'g\'imi (plafond)', d: 'Katta boldir suyagining pastki bo\'g\'im yuzasi — ichki va tashqi chekkasi. Ularning o\'rtasi to\'piq markazi bo\'ladi.' },
+    a2: { s: 'To\'piq ②', t: 'To\'piq bo\'g\'imi (plafond)', d: 'Plafondning ikkinchi chekkasi.' },
+  };
+  const LEGNAME = { R: 'O\'ng oyoq', L: 'Chap oyoq' };
+  const css = n => getComputedStyle(document.documentElement).getPropertyValue(n).trim();
+
+  const S = {
+    study: null, demo: false, pts: { R: {}, L: {} }, leg: 'R', target: { leg: 'R', key: 'hip' },
+    proj: 'drr', contrast: 50, mmpp: null, cal: { active: false, p: [] }, base: null, norm: {},
+    seq: 0, zipResult: null, dirty3d: true, corr: 0, layers: { cloud: true, schema: false, norm: true, axes: true }, focus: 'both',
+  };
+
+  // ---------------- Tablar ----------------
+  const tabs = ['upload', 'points', 'result', '3d'];
+  function showTab(name) {
+    for (const t of tabs) {
+      $('v-' + t).hidden = t !== name;
+      $('t-' + t).setAttribute('aria-selected', t === name ? 'true' : 'false');
+    }
+    window.scrollTo(0, 0);
+    if (name === 'points') requestAnimationFrame(() => { resize(); });
+    if (name === 'result') renderResults();
+    if (name === '3d') requestAnimationFrame(() => show3D());
+    try { localStorage.setItem('oyoq-tab', name); } catch (e) { }
+  }
+  document.querySelectorAll('nav.steps button').forEach(b => b.addEventListener('click', () => showTab(b.dataset.tab)));
+
+  // ---------------- Yuklash ----------------
+  const drop = $('drop');
+  ['dragenter', 'dragover'].forEach(ev => drop.addEventListener(ev, e => { e.preventDefault(); drop.classList.add('over'); }));
+  ['dragleave', 'drop'].forEach(ev => drop.addEventListener(ev, e => { e.preventDefault(); drop.classList.remove('over'); }));
+  drop.addEventListener('drop', e => { const f = e.dataTransfer.files[0]; if (f) handleFile(f); });
+  $('fileZip').addEventListener('change', e => { const f = e.target.files[0]; if (f) handleFile(f); e.target.value = ''; });
+  $('fileImg').addEventListener('change', e => { const f = e.target.files[0]; if (f) handleImage(f); e.target.value = ''; });
+  $('demoBtn').addEventListener('click', () => loadDemo(true));
+
+  function setMsg(kind, html) { $('loadMsg').innerHTML = html ? `<div class="notice ${kind}">${html}</div>` : ''; }
+  function progress(title, p, note) {
+    $('loadCard').hidden = false; $('loadTitle').textContent = title;
+    $('loadBar').style.width = Math.round(p * 100) + '%'; $('loadNote').textContent = note || '';
+  }
+  function handleFile(f) {
+    if (/^image\//.test(f.type) || /\.(jpe?g|png|webp)$/i.test(f.name)) return handleImage(f);
+    handleZip(f);
+  }
+  async function handleZip(file) {
+    S.seq++;
+    setMsg('', ''); $('seriesCard').hidden = true; $('studyCard').hidden = true;
+    if (typeof JSZip === 'undefined' || typeof dicomParser === 'undefined') { setMsg('bad', 'Kutubxonalar yuklanmadi. Internet aloqasini tekshirib, sahifani yangilang.'); return; }
+    progress('ZIP o\'qilmoqda…', 0.02, file.name + ' · ' + (file.size / 1048576).toFixed(0) + ' MB');
+    try {
+      const r = await C.readZip(file, p => progress('Kesimlar o\'qilmoqda…', p, Math.round(p * 100) + '%'));
+      S.zipResult = r;
+      $('loadCard').hidden = true;
+      const locs = r.localizers || [];
+      const axLen = x => { const zs = x.slices.map(q => q.z); return Math.max(...zs) - Math.min(...zs); };
+      if (!r.series.length && !locs.length) {
+        if (r.compressed) setMsg('bad', `<b>Tasvirlar qo'llab-quvvatlanmaydigan siqilgan formatda</b> (${r.compressedTS}). RadiAnt yoki boshqa DICOM dasturi orqali «siqilmagan» (uncompressed) formatda qayta eksport qilib, ZIP qiling.`);
+        else setMsg('bad', `<b>Mos KT seriyasi topilmadi.</b> ZIP ichida ${r.total} ta fayl bor edi. Ko'ndalang (axial) kesimlardan iborat, kamida 20 ta kesimli seriya yoki butun oyoq surview'i kerak.`);
+        return;
+      }
+      if (r.compressed) setMsg('warn', `${r.compressed} ta fayl siqilgan format sababli o'tkazib yuborildi.`);
+      const best = r.series[0], bestLen = best ? axLen(best) : 0;
+      // aksial seriya butun oyoqni qamramasa — surview bo'yicha tahlil
+      if (locs.length && bestLen < 600 && locs[0].lenmm > bestLen) {
+        setMsg('warn', `<b>Aksial kesimlar faqat ${(bestLen / 10).toFixed(0)} sm sohani qamraydi</b> — butun oyoq o'qini o'lchash uchun yetmaydi. Shu sababli tahlil <b>surview (topogramma)</b> bo'yicha ochildi: u ${(locs[0].lenmm / 10).toFixed(0)} sm ni qamraydi. Nuqtalarni qo'lda qo'ying.`);
+        return openLocalizer(locs[0]);
+      }
+      if (r.series.length === 1 && !locs.length) return openSeries(r.series[0]);
+      const sel = $('seriesSel'); sel.innerHTML = '';
+      r.series.forEach((s, i) => {
+        const o = document.createElement('option'); o.value = 's' + i;
+        o.textContent = `${s.desc || 'Seriya'} — ${s.slices.length} kesim, ${(axLen(s) / 10).toFixed(0)} sm`;
+        sel.appendChild(o);
+      });
+      locs.forEach((L, i) => { const o = document.createElement('option'); o.value = 'l' + i; o.textContent = `Surview (${L.desc}) — ${(L.lenmm / 10).toFixed(0)} sm`; sel.appendChild(o); });
+      $('seriesCard').hidden = false;
+    } catch (e) {
+      console.error(e); $('loadCard').hidden = true;
+      setMsg('bad', '<b>Faylni o\'qib bo\'lmadi.</b> Bu ZIP arxiv ekanini va ichida DICOM fayllar borligini tekshiring. (' + (e.message || e) + ')');
+    }
+  }
+  $('seriesGo').addEventListener('click', () => {
+    const v = $('seriesSel').value, i = +v.slice(1);
+    if (v[0] === 'l') openLocalizer(S.zipResult.localizers[i]); else openSeries(S.zipResult.series[i]);
+  });
+  function openLocalizer(L) {
+    const st = C.studyFromLocalizer(L);
+    setStudy(st, false, { noAuto: true });
+    showStudyCard();
+    showTab('points');
+  }
+
+  function openSeries(s) {
+    progress('Tasvir yasalmoqda…', 0.9);
+    setTimeout(() => {
+      const st = C.buildStudy(s);
+      $('loadCard').hidden = true;
+      setStudy(st, false);
+      showStudyCard();
+      showTab('points');
+    }, 30);
+  }
+
+  function showStudyCard() {
+    const st = S.study, i = st.info || {}, c = $('studyCard');
+    if (st.localizer) {
+      c.innerHTML = `<b>Ochilgan tasvir: surview</b><dl class="kv"><dt>Tavsif</dt><dd>${esc(i.desc || '—')}</dd><dt>Bemor</dt><dd>${esc((i.patient || '—').replace(/\^/g, ' '))}</dd><dt>Uzunlik</dt><dd class="num">${(i.lenmm / 10).toFixed(0)} sm</dd><dt>Piksel</dt><dd class="num">${(+i.psCol).toFixed(2)} mm</dd></dl>
+        <div class="notice warn">Surview — past dozali proyeksiya, ko'rinish aniqligi ~1 mm. Bo'g'im chiziqlari burchaklari ±2–3° gacha xato berishi mumkin; HKA va MAD ishonchliroq.</div>`;
+      c.style.display = 'grid'; c.style.gap = '10px'; c.hidden = false; return;
+    }
+    if (st.mode !== 'ct') { c.hidden = true; return; }
+    const warns = [];
+    if (i.sliceGap > 2.01) warns.push(`Kesimlar oralig'i ${i.sliceGap.toFixed(1)} mm — bo'g'im chiziqlari burchaklari (mLDFA, mMPTA, JLCA) taxminan ±2° xatolik bilan o'lchanadi. 1–1.5 mm bo'lsa aniqroq.`);
+    const lenmm = st.H * st.mmpp;
+    if (lenmm < 700) warns.push(`Seriya uzunligi ${(lenmm / 10).toFixed(0)} sm. Butun oyoq (son boshidan to'piqgacha) tushmagan bo'lishi mumkin.`);
+    c.innerHTML = `<b>Ochilgan seriya</b>
+      <dl class="kv"><dt>Tavsif</dt><dd>${esc(i.desc || '—')}</dd><dt>Bemor</dt><dd>${esc((i.patient || '—').replace(/\^/g, ' '))}</dd>
+      <dt>Kesimlar</dt><dd class="num">${i.slices} · ${i.cols}×${i.rows}</dd><dt>Piksel / qadam</dt><dd class="num">${(+i.psx).toFixed(2)} mm / ${(+i.sliceGap).toFixed(2)} mm</dd>
+      <dt>Uzunlik</dt><dd class="num">${(lenmm / 10).toFixed(1)} sm</dd></dl>
+      ${warns.map(w => `<div class="notice warn">${w}</div>`).join('')}`;
+    c.style.display = 'grid'; c.style.gap = '10px'; c.hidden = false;
+  }
+
+  function handleImage(file) {
+    S.seq++;
+    setMsg('', '');
+    const url = URL.createObjectURL(file), img = new Image();
+    img.onload = () => {
+      const maxD = 2400, k = Math.min(1, maxD / Math.max(img.width, img.height));
+      const W = Math.round(img.width * k), H = Math.round(img.height * k);
+      const c = document.createElement('canvas'); c.width = W; c.height = H;
+      const g = c.getContext('2d'); g.drawImage(img, 0, 0, W, H);
+      const d = g.getImageData(0, 0, W, H).data, gray = new Float32Array(W * H);
+      for (let i = 0; i < W * H; i++) gray[i] = (0.299 * d[i * 4] + 0.587 * d[i * 4 + 1] + 0.114 * d[i * 4 + 2]) / 255;
+      URL.revokeObjectURL(url);
+      const st = C.studyFromGray(gray, W, H);
+      st.info = { desc: file.name };
+      setStudy(st, false);
+      $('studyCard').hidden = true;
+      setMsg('warn', 'Rentgen surati yuklandi. Burchaklar o\'lchanadi; MAD va uzunliklar uchun «Nuqtalar» bo\'limida kalibrlang. Dastur rasmda bemorning o\'ng tomoni chapda turibdi deb hisoblaydi.');
+      showTab('points');
+    };
+    img.onerror = () => setMsg('bad', 'Rasmni ochib bo\'lmadi. JPG yoki PNG fayl tanlang.');
+    img.src = url;
+  }
+
+  async function loadDemo(go) {
+    const seq = ++S.seq;
+    progress('Namuna tayyorlanmoqda…', 0.02, 'Sintetik KT: o\'ng oyoqda tibial varus, chap oyoq deyarli norma');
+    const s = await C.makeDemoSlices({ async: true, onProgress: p => progress('Namuna tayyorlanmoqda…', p, 'Sintetik KT: o\'ng oyoqda tibial varus, chap oyoq deyarli norma') });
+    if (seq !== S.seq) return; // foydalanuvchi bu orada o'z faylini ochdi
+    const st = C.buildStudy(s);
+    $('loadCard').hidden = true;
+    setStudy(st, true);
+    showStudyCard();
+    if (go) showTab('points');
+  }
+
+  function setStudy(st, demo, opts) {
+    opts = opts || {};
+    S.study = st; S.demo = demo; S.mmpp = st.mmpp; S.cal = { active: false, p: [] };
+    $('demoFlag').hidden = !demo;
+    S.norm = {};
+    if (st.mode === 'ct') { S.norm.drr = normArr(st.drr); S.norm.mip = normArr(st.mip); S.proj = 'drr'; }
+    else { S.norm.img = normArr(st.img); S.proj = 'img'; }
+    $('projSeg').querySelectorAll('[data-proj="drr"],[data-proj="mip"]').forEach(b => b.hidden = st.mode !== 'ct');
+    $('projSeg').querySelector('[data-proj="img"]').hidden = st.mode === 'ct';
+    syncProj();
+    $('calBox').hidden = st.mode === 'ct' || !!st.mmpp;
+    updateCalState();
+    const a = opts.noAuto ? {} : C.autoLandmarks(st);
+    S.pts = { R: a.R ? { ...a.R } : {}, L: a.L ? { ...a.L } : {} };
+    S.auto = !!(a.R || a.L);
+    S.leg = 'R'; nextTarget();
+    buildBase(); S.dirty3d = true; S.fitted = false;
+    syncLegButtons(); renderList(); updateLive();
+  }
+
+  function normArr(arr) {
+    const n = arr.length, step = Math.max(1, Math.floor(n / 40000)), smp = [];
+    for (let i = 0; i < n; i += step) smp.push(arr[i]);
+    smp.sort((a, b) => a - b);
+    const lo = smp[Math.floor(smp.length * 0.02)], hi = smp[Math.floor(smp.length * 0.997)];
+    const out = new Float32Array(n), k = 1 / Math.max(1e-6, hi - lo);
+    for (let i = 0; i < n; i++) { const v = (arr[i] - lo) * k; out[i] = v < 0 ? 0 : v > 1 ? 1 : v; }
+    return out;
+  }
+  // lokal kontrast (yuqori chastota): suyak konturlari yaxshi ko'rinadi
+  function edgeArr(a, W, H, r) {
+    const tmp = new Float32Array(W * H), bl = new Float32Array(W * H);
+    for (let y = 0; y < H; y++) { let acc = 0; const o = y * W; for (let x = -r; x < W; x++) { if (x + r < W) acc += a[o + x + r]; if (x - r - 1 >= 0) acc -= a[o + x - r - 1]; if (x >= 0) tmp[o + x] = acc / (Math.min(W - 1, x + r) - Math.max(0, x - r) + 1); } }
+    for (let x = 0; x < W; x++) { let acc = 0; for (let y = -r; y < H; y++) { if (y + r < H) acc += tmp[(y + r) * W + x]; if (y - r - 1 >= 0) acc -= tmp[(y - r - 1) * W + x]; if (y >= 0) bl[y * W + x] = acc / (Math.min(H - 1, y + r) - Math.max(0, y - r) + 1); } }
+    for (let i = 0; i < W * H; i++) bl[i] = a[i] - bl[i];
+    return normArr(bl);
+  }
+  function syncProj() { $('projSeg').querySelectorAll('button').forEach(x => x.setAttribute('aria-pressed', x.dataset.proj === S.proj || (S.proj === 'img' && x.dataset.proj === 'img') ? 'true' : 'false')); }
+  function buildBase() {
+    const st = S.study; if (!st) return;
+    if (S.proj === 'edge' && !S.norm.edge) S.norm.edge = edgeArr(S.norm[S.study.mode === 'ct' ? 'drr' : 'img'], st.W, st.H, Math.max(3, Math.round(8 / (st.mmpp || 1))));
+    const src = S.norm[S.proj] || S.norm.img;
+    const c = S.base || document.createElement('canvas');
+    c.width = st.W; c.height = st.H;
+    const g = c.getContext('2d'), id = g.createImageData(st.W, st.H), d = id.data;
+    const gamma = Math.pow(2, (50 - S.contrast) / 30);
+    const lut = new Uint8ClampedArray(1024);
+    for (let i = 0; i < 1024; i++) lut[i] = Math.pow(i / 1023, gamma) * 255;
+    for (let i = 0; i < src.length; i++) { const v = lut[(src[i] * 1023) | 0]; d[i * 4] = v; d[i * 4 + 1] = v; d[i * 4 + 2] = v; d[i * 4 + 3] = 255; }
+    g.putImageData(id, 0, 0);
+    S.base = c;
+    draw();
+  }
+  $('contrast').addEventListener('input', e => { S.contrast = +e.target.value; buildBase(); });
+  $('projSeg').addEventListener('click', e => {
+    const b = e.target.closest('button'); if (!b) return;
+    S.proj = b.dataset.proj; syncProj();
+    buildBase();
+  });
+
+  // ---------------- Nuqtalar ro'yxati ----------------
+  function nextTarget() {
+    for (const leg of [S.leg, S.leg === 'R' ? 'L' : 'R']) {
+      const k = KEYS.find(k => !S.pts[leg][k]);
+      if (k) { S.target = { leg, key: k }; if (leg !== S.leg) { S.leg = leg; syncLegButtons(); } return; }
+    }
+    S.target = null;
+  }
+  function syncLegButtons() {
+    $('legR').setAttribute('aria-pressed', S.leg === 'R' ? 'true' : 'false');
+    $('legL').setAttribute('aria-pressed', S.leg === 'L' ? 'true' : 'false');
+  }
+  $('legR').addEventListener('click', () => { S.leg = 'R'; const k = KEYS.find(k => !S.pts.R[k]); S.target = k ? { leg: 'R', key: k } : null; syncLegButtons(); renderList(); draw(); });
+  $('legL').addEventListener('click', () => { S.leg = 'L'; const k = KEYS.find(k => !S.pts.L[k]); S.target = k ? { leg: 'L', key: k } : null; syncLegButtons(); renderList(); draw(); });
+
+  function renderList() {
+    const ul = $('lmList'); ul.innerHTML = '';
+    for (const k of KEYS) {
+      const li = document.createElement('li'), b = document.createElement('button');
+      const done = !!S.pts[S.leg][k], cur = S.target && S.target.leg === S.leg && S.target.key === k;
+      if (done) b.classList.add('done');
+      if (cur) b.setAttribute('aria-current', 'step');
+      b.innerHTML = `<span class="st">${done ? '✓' : ''}</span><span>${LM[k].s}</span><small>${cur ? 'bosing' : done ? 'qayta' : ''}</small>`;
+      b.addEventListener('click', () => { S.target = { leg: S.leg, key: k }; renderList(); draw(); });
+      li.appendChild(b); ul.appendChild(li);
+    }
+    const t = S.target && S.target.leg === S.leg ? LM[S.target.key] : null;
+    $('guideTitle').textContent = t ? t.t : 'Barcha nuqtalar qo\'yilgan';
+    $('guideText').textContent = t ? t.d : 'Nuqtani barmoq bilan surib aniqlashtiring yoki ro\'yxatdan tanlab qaytadan qo\'ying.';
+    drawMini(S.target && S.target.leg === S.leg ? S.target.key : null);
+    const tip = $('tip');
+    if (S.cal.active) tip.textContent = `Kalibrlash: ${S.cal.p.length + 1}-nuqtani bosing`;
+    else if (S.target) tip.textContent = `${LEGNAME[S.target.leg]}: ${LM[S.target.key].s} — rasmga bosing`;
+    else tip.textContent = S.auto ? 'Nuqtalar avtomatik taklif qilindi — har birini tekshiring va kerak bo\'lsa suring' : 'Nuqtani surib aniqlashtiring';
+  }
+
+  function drawMini(active) {
+    const groups = { hip: [[36, 14]], f1: [[24, 70], [46, 70]], f2: [[24, 70], [46, 70]], t1: [[25, 77], [47, 77]], t2: [[25, 77], [47, 77]], a1: [[34, 134], [48, 134]], a2: [[34, 134], [48, 134]] };
+    const bone = '#e9dfc9';
+    let s = `<path d="M30 8 a9 9 0 1 1 1 0" fill="${bone}"/><path d="M40 16 L30 66" stroke="${bone}" stroke-width="9" stroke-linecap="round"/>
+      <rect x="20" y="58" width="30" height="12" rx="5" fill="${bone}"/><rect x="21" y="77" width="28" height="9" rx="3" fill="${bone}"/>
+      <path d="M36 86 L40 130" stroke="${bone}" stroke-width="8" stroke-linecap="round"/><path d="M49 88 L51 132" stroke="${bone}" stroke-width="3" opacity=".7"/>
+      <rect x="31" y="126" width="20" height="8" rx="2" fill="${bone}"/><rect x="33" y="137" width="16" height="9" rx="3" fill="${bone}" opacity=".8"/>`;
+    for (const k of KEYS) {
+      if (k === 'f2' || k === 't2' || k === 'a2') continue;
+      const on = active && (active === k || active === k.replace('1', '2') || (active[0] === k[0] && active !== 'hip' && k !== 'hip'));
+      for (const [x, y] of groups[k]) s += `<circle cx="${x}" cy="${y}" r="${on ? 4.5 : 3}" fill="${on ? css('--pt-r') : '#5d7380'}" stroke="#0c151b" stroke-width="1"/>`;
+    }
+    $('miniLeg').innerHTML = s;
+  }
+
+  $('autoBtn').addEventListener('click', () => {
+    if (!S.study) return;
+    const a = C.autoLandmarks(S.study);
+    if (a[S.leg]) S.pts[S.leg] = { ...a[S.leg] };
+    S.auto = true; nextTarget(); changed();
+  });
+  $('clearBtn').addEventListener('click', () => { S.pts[S.leg] = {}; S.target = { leg: S.leg, key: 'hip' }; changed(); });
+  $('toResult').addEventListener('click', () => showTab('result'));
+
+  function changed() { S.dirty3d = true; renderList(); updateLive(); draw(); }
+
+  function measureAll() {
+    const r = {};
+    for (const s of ['R', 'L']) r[s] = C.measureLeg(S.pts[s], s, S.mmpp);
+    return r;
+  }
+  function updateLive() {
+    const r = measureAll(), box = $('liveBox');
+    box.innerHTML = ['R', 'L'].map(s => {
+      const m = r[s];
+      if (!m) return `<div><span class="muted" style="font-size:12px">${LEGNAME[s]}</span><br><span class="muted">nuqtalar to'liq emas</span></div>`;
+      const c = C.classify(m);
+      return `<div><span class="muted" style="font-size:12px">${LEGNAME[s]} · HKA</span><br><b>${fmtDev(m.HKA)}</b> <span class="pill g${c.grade}" style="font-size:11px;padding:1px 7px">${c.type === 'norma' ? 'norma' : c.type}</span></div>`;
+    }).join('');
+  }
+  const fmtDev = v => Math.abs(v).toFixed(1) + '°';
+
+  // ---------------- Tasvir ko'rgich (pan/zoom/nuqtalar) ----------------
+  const stage = $('stage'), cv = $('cv'), ctx = cv.getContext('2d');
+  const V = { s: 1, tx: 0, ty: 0 };
+  let dpr = 1, loupe = null;
+  function resize() {
+    dpr = Math.min(window.devicePixelRatio || 1, 2.5);
+    const w = stage.clientWidth, h = stage.clientHeight;
+    if (!w || !h) return;
+    cv.width = Math.round(w * dpr); cv.height = Math.round(h * dpr);
+    if (!S.fitted) fit();
+    draw();
+  }
+  function fit() {
+    if (!S.study) return;
+    const w = stage.clientWidth, h = stage.clientHeight, st = S.study;
+    if (!w) return;
+    V.s = Math.min(w / st.W, h / st.H) * 0.96; V.tx = (w - st.W * V.s) / 2; V.ty = (h - st.H * V.s) / 2; S.fitted = true;
+  }
+  window.addEventListener('resize', () => { if (!$('v-points').hidden) resize(); if (!$('v-3d').hidden) size3D(); });
+  const toScr = p => [p[0] * V.s + V.tx, p[1] * V.s + V.ty];
+  const toImg = (x, y) => [(x - V.tx) / V.s, (y - V.ty) / V.s];
+
+  function draw() {
+    if (!cv.width) return;
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    ctx.fillStyle = css('--lightbox'); ctx.fillRect(0, 0, cv.width, cv.height);
+    if (!S.study || !S.base) return;
+    ctx.imageSmoothingEnabled = V.s < 3;
+    ctx.drawImage(S.base, V.tx, V.ty, S.study.W * V.s, S.study.H * V.s);
+    drawOverlay(ctx, toScr, 1, true);
+    if (S.cal.p.length) {
+      ctx.strokeStyle = '#ffd34d'; ctx.fillStyle = '#ffd34d'; ctx.lineWidth = 2;
+      const ps = S.cal.p.map(toScr);
+      ps.forEach(p => { ctx.beginPath(); ctx.arc(p[0], p[1], 4, 0, 7); ctx.fill(); });
+      if (ps.length === 2) { ctx.beginPath(); ctx.moveTo(...ps[0]); ctx.lineTo(...ps[1]); ctx.stroke(); }
+    }
+    if (loupe) drawLoupe(loupe);
+    $('hudInfo').textContent = S.demo ? 'NAMUNA' : (S.study.mode === 'ct' ? 'MSKT' : S.study.localizer ? 'SURVIEW' : 'RENTGEN');
+  }
+
+  function legColor(s) { return s === 'R' ? css('--pt-r') : css('--pt-l'); }
+
+  function drawOverlay(g, T, k, interactive) {
+    const P = S.pts, res = measureAll();
+    g.lineCap = 'round';
+    for (const s of ['R', 'L']) {
+      const p = P[s], col = legColor(s);
+      const mid = (a, b) => [(a[0] + b[0]) / 2, (a[1] + b[1]) / 2];
+      const line = (a, b, c, w, dash) => { g.strokeStyle = c; g.lineWidth = w * k; g.setLineDash(dash ? dash.map(x => x * k) : []); g.beginPath(); g.moveTo(...T(a)); g.lineTo(...T(b)); g.stroke(); g.setLineDash([]); };
+      if (p.f1 && p.f2) line(p.f1, p.f2, '#ffffff', 1.6);
+      if (p.t1 && p.t2) line(p.t1, p.t2, '#ffffff', 1.6);
+      if (p.a1 && p.a2) line(p.a1, p.a2, '#ffffff', 1.6);
+      const Kf = p.f1 && p.f2 ? mid(p.f1, p.f2) : null, Kt = p.t1 && p.t2 ? mid(p.t1, p.t2) : null, Ac = p.a1 && p.a2 ? mid(p.a1, p.a2) : null;
+      if (p.hip && Kf) line(p.hip, Kf, col, 1.6);
+      if (Kt && Ac) line(Kt, Ac, col, 1.6);
+      if (p.hip && Ac) {
+        line(p.hip, Ac, css('--axis'), 2.2, [7, 5]);
+        const m = res[s];
+        if (m && Kf && Kt) {
+          const Kc = T(mid(Kf, Kt));
+          const c = C.classify(m);
+          const txt = `${Math.abs(m.HKA).toFixed(1)}° ${c.type === 'norma' ? 'norma' : c.type}`;
+          g.font = `700 ${13 * k}px ${css('--f-num')}`;
+          const tw = g.measureText(txt).width, dir = s === 'R' ? -1 : 1;
+          let x = Kc[0] + dir * 34 * k - (dir < 0 ? tw : 0); const y = Kc[1] - 30 * k;
+          const cw = g.canvas.width / (g.getTransform ? g.getTransform().a : 1); x = Math.max(8 * k, Math.min(cw - tw - 8 * k, x));
+          g.fillStyle = 'rgba(8,14,18,.82)'; g.fillRect(x - 6 * k, y - 15 * k, tw + 12 * k, 21 * k);
+          g.fillStyle = c.grade >= 2 ? '#ff8f84' : c.grade === 1 ? '#ffd27a' : '#7fe0b0'; g.fillText(txt, x, y);
+        }
+      }
+      for (const key of KEYS) {
+        if (!p[key]) continue;
+        const q = T(p[key]), isT = interactive && S.target && S.target.leg === s && S.target.key === key;
+        g.fillStyle = col; g.strokeStyle = '#0b1217'; g.lineWidth = 2 * k;
+        g.beginPath(); g.arc(q[0], q[1], (key === 'hip' ? 5.5 : 4.5) * k, 0, 7); g.fill(); g.stroke();
+        if (key === 'hip' && interactive) { g.strokeStyle = col; g.lineWidth = 1; g.globalAlpha = .55; const r = 23 / (S.mmpp || (1000 / S.study.H)) * V.s; g.beginPath(); g.arc(q[0], q[1], r, 0, 7); g.stroke(); g.globalAlpha = 1; }
+        if (isT) { g.strokeStyle = '#ffffff'; g.lineWidth = 1.5; g.beginPath(); g.arc(q[0], q[1], 11, 0, 7); g.stroke(); }
+      }
+    }
+  }
+
+  function drawLoupe(pt) {
+    const R = 64, z = Math.max(3, V.s * 3) / V.s; // loupe ichida 3 barobar kattaroq
+    const scr = toScr(pt), w = stage.clientWidth;
+    const cx = scr[0] < w / 2 ? w - R - 14 : R + 14, cy = R + 40;
+    ctx.save(); ctx.beginPath(); ctx.arc(cx, cy, R, 0, 7); ctx.clip();
+    ctx.fillStyle = '#000'; ctx.fillRect(cx - R, cy - R, 2 * R, 2 * R);
+    const s2 = V.s * z;
+    ctx.imageSmoothingEnabled = false;
+    ctx.drawImage(S.base, cx - pt[0] * s2, cy - pt[1] * s2, S.study.W * s2, S.study.H * s2);
+    const T2 = p => [cx + (p[0] - pt[0]) * s2, cy + (p[1] - pt[1]) * s2];
+    drawOverlay(ctx, T2, 1, false);
+    ctx.restore();
+    ctx.strokeStyle = '#ffffff'; ctx.lineWidth = 2; ctx.beginPath(); ctx.arc(cx, cy, R, 0, 7); ctx.stroke();
+    ctx.strokeStyle = 'rgba(255,255,255,.7)'; ctx.lineWidth = 1;
+    ctx.beginPath(); ctx.moveTo(cx - 10, cy); ctx.lineTo(cx + 10, cy); ctx.moveTo(cx, cy - 10); ctx.lineTo(cx, cy + 10); ctx.stroke();
+  }
+
+  // pointer boshqaruvi
+  const ptrs = new Map();
+  let gest = null;
+  stage.addEventListener('pointerdown', e => {
+    if (e.target.closest('.tools')) return;
+    stage.setPointerCapture(e.pointerId);
+    const r = stage.getBoundingClientRect(), x = e.clientX - r.left, y = e.clientY - r.top;
+    ptrs.set(e.pointerId, [x, y]);
+    if (ptrs.size === 2) {
+      const [a, b] = [...ptrs.values()];
+      gest = { type: 'pinch', d: Math.hypot(a[0] - b[0], a[1] - b[1]), s: V.s, tx: V.tx, ty: V.ty, c: [(a[0] + b[0]) / 2, (a[1] + b[1]) / 2] };
+      loupe = null; return;
+    }
+    const hit = hitTest(x, y);
+    gest = { type: hit ? 'drag' : 'maybe', hit, x0: x, y0: y, tx: V.tx, ty: V.ty, moved: false };
+    if (hit) { S.leg = hit.leg; syncLegButtons(); S.target = { leg: hit.leg, key: hit.key }; renderList(); loupe = S.pts[hit.leg][hit.key]; draw(); }
+  });
+  stage.addEventListener('pointermove', e => {
+    if (!ptrs.has(e.pointerId) || !gest) return;
+    const r = stage.getBoundingClientRect(), x = e.clientX - r.left, y = e.clientY - r.top;
+    ptrs.set(e.pointerId, [x, y]);
+    if (gest.type === 'pinch' && ptrs.size === 2) {
+      const [a, b] = [...ptrs.values()], d = Math.hypot(a[0] - b[0], a[1] - b[1]), c = [(a[0] + b[0]) / 2, (a[1] + b[1]) / 2];
+      const ns = Math.min(40, Math.max(0.05, gest.s * d / gest.d));
+      V.tx = c[0] - (gest.c[0] - gest.tx) * ns / gest.s; V.ty = c[1] - (gest.c[1] - gest.ty) * ns / gest.s; V.s = ns; draw(); return;
+    }
+    const dx = x - gest.x0, dy = y - gest.y0;
+    if (Math.hypot(dx, dy) > 6) gest.moved = true;
+    if (gest.type === 'drag') {
+      const p = toImg(x, y); S.pts[gest.hit.leg][gest.hit.key] = p; loupe = p; updateLive(); draw();
+    } else if (gest.moved) { V.tx = gest.tx + dx; V.ty = gest.ty + dy; draw(); }
+  });
+  const endPtr = e => {
+    if (!ptrs.has(e.pointerId)) return;
+    const r = stage.getBoundingClientRect(), x = e.clientX - r.left, y = e.clientY - r.top;
+    ptrs.delete(e.pointerId);
+    if (!gest) return;
+    if (gest.type === 'pinch') { if (ptrs.size === 0) gest = null; return; }
+    if (gest.type === 'drag') { loupe = null; changed(); }
+    else if (!gest.moved && e.type === 'pointerup') tap(toImg(x, y));
+    gest = null; loupe = null; draw();
+  };
+  stage.addEventListener('pointerup', endPtr);
+  stage.addEventListener('pointercancel', endPtr);
+  stage.addEventListener('wheel', e => {
+    e.preventDefault();
+    const r = stage.getBoundingClientRect(), x = e.clientX - r.left, y = e.clientY - r.top;
+    zoomAt(x, y, Math.exp(-e.deltaY * 0.0015));
+  }, { passive: false });
+  function zoomAt(x, y, f) {
+    const ns = Math.min(40, Math.max(0.05, V.s * f));
+    V.tx = x - (x - V.tx) * ns / V.s; V.ty = y - (y - V.ty) * ns / V.s; V.s = ns; draw();
+  }
+  $('zIn').addEventListener('click', () => zoomAt(stage.clientWidth / 2, stage.clientHeight / 2, 1.5));
+  $('zOut').addEventListener('click', () => zoomAt(stage.clientWidth / 2, stage.clientHeight / 2, 1 / 1.5));
+  $('zFit').addEventListener('click', () => { fit(); draw(); });
+
+  function hitTest(x, y) {
+    let best = null, bd = 18;
+    for (const leg of [S.leg, S.leg === 'R' ? 'L' : 'R']) for (const k of KEYS) {
+      const p = S.pts[leg][k]; if (!p) continue;
+      const q = toScr(p), d = Math.hypot(q[0] - x, q[1] - y);
+      if (d < bd) { bd = d; best = { leg, key: k }; }
+    }
+    return best;
+  }
+  function tap(p) {
+    if (!S.study) return;
+    if (p[0] < 0 || p[1] < 0 || p[0] > S.study.W || p[1] > S.study.H) return;
+    if (S.cal.active) {
+      S.cal.p.push(p);
+      if (S.cal.p.length === 2) { S.cal.active = false; applyCal(); }
+      renderList(); draw(); return;
+    }
+    if (!S.target) return;
+    S.pts[S.target.leg][S.target.key] = p;
+    S.auto = false;
+    const leg = S.target.leg, k = KEYS.find(k => !S.pts[leg][k]);
+    S.target = k ? { leg, key: k } : null;
+    if (!k) nextTarget();
+    changed();
+  }
+
+  // kalibrlash (rentgen uchun)
+  $('calStart').addEventListener('click', () => { S.cal = { active: true, p: [] }; renderList(); draw(); });
+  $('calMM').addEventListener('input', () => { if (S.cal.p.length === 2) applyCal(); });
+  function applyCal() {
+    const [a, b] = S.cal.p, d = Math.hypot(a[0] - b[0], a[1] - b[1]), mm = +$('calMM').value;
+    if (d > 3 && mm > 0) { S.mmpp = mm / d; S.study.mmpp = S.mmpp; }
+    updateCalState(); changed();
+  }
+  function updateCalState() {
+    $('calState').textContent = S.mmpp ? `Kalibrlangan: 1 piksel = ${S.mmpp.toFixed(3)} mm` : 'Kalibrlanmagan: faqat burchaklar ko\'rsatiladi.';
+  }
+
+  // ---------------- Natija ----------------
+  const esc = s => String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+  function gauge(v) {
+    const W = 320, cx = 160, cy = 150, R = 120;
+    const pos = d => { const t = Math.PI - (Math.max(-15, Math.min(15, d)) + 15) / 30 * Math.PI; return [cx + R * Math.cos(t), cy - R * Math.sin(t)]; };
+    const arc = (a, b, col, w) => { const p = pos(a), q = pos(b); return `<path d="M${p[0].toFixed(1)} ${p[1].toFixed(1)} A${R} ${R} 0 0 1 ${q[0].toFixed(1)} ${q[1].toFixed(1)}" stroke="${col}" stroke-width="${w}" fill="none"/>`; };
+    const n = pos(v), ticks = [-15, -10, -5, 0, 5, 10, 15].map(t => { const p = pos(t), q = [cx + (p[0] - cx) * 1.12, cy + (p[1] - cy) * 1.12]; return `<text x="${q[0].toFixed(1)}" y="${(q[1] + 4).toFixed(1)}" text-anchor="middle" font-size="11" fill="var(--muted)" font-family="var(--f-num)">${Math.abs(t)}</text>`; }).join('');
+    return `<svg class="gauge" viewBox="0 0 ${W} 178" role="img" aria-label="Og'ish: ${v.toFixed(1)} daraja">
+      ${arc(-15, -10, 'var(--bad)', 16)}${arc(-10, -5, 'var(--warn)', 16)}${arc(-5, -2, 'color-mix(in srgb,var(--warn) 55%,var(--ok))', 16)}${arc(-2, 3, 'var(--ok)', 16)}${arc(3, 5, 'color-mix(in srgb,var(--warn) 55%,var(--ok))', 16)}${arc(5, 10, 'var(--warn)', 16)}${arc(10, 15, 'var(--bad)', 16)}
+      ${ticks}
+      <line x1="${cx}" y1="${cy}" x2="${n[0].toFixed(1)}" y2="${n[1].toFixed(1)}" stroke="var(--ink)" stroke-width="3.5" stroke-linecap="round"/>
+      <circle cx="${cx}" cy="${cy}" r="7" fill="var(--ink)"/>
+      <text x="22" y="174" font-size="12" font-weight="700" fill="var(--muted)">X-shakl (valgus)</text>
+      <text x="298" y="174" font-size="12" font-weight="700" fill="var(--muted)" text-anchor="end">O-shakl (varus)</text>
+      <text x="${cx}" y="22" font-size="11" font-weight="700" fill="var(--ok)" text-anchor="middle">NORMA</text>
+    </svg>`;
+  }
+
+  function legCard(s, m) {
+    if (!m) return `<article class="card legcard"><header><h2>${LEGNAME[s]}</h2></header><div class="empty"><span>Bu oyoq uchun nuqtalar to'liq qo'yilmagan.</span><button class="btn" data-goto="points">Nuqtalarni qo'yish</button></div></article>`;
+    const c = C.classify(m), lld = otherLLD(s);
+    const typeName = c.type === 'varus' ? 'varus — O-simon oyoq' : c.type === 'valgus' ? 'valgus — X-simon oyoq' : 'o\'q normada';
+    let ex;
+    if (c.type === 'norma') ex = `Son boshi va to'piqni tutashtiruvchi yuklama chizig'i tizza markaziga yaqin o'tadi${m.MAD != null ? ` (${Math.abs(m.MAD).toFixed(0)} mm ${m.MAD >= 0 ? 'ichkarida' : 'tashqarida'}; normada 0–15 mm ichkarida)` : ''}. Son va boldir o'qlari orasidagi og'ish ${Math.abs(m.HKA).toFixed(1)}°.`;
+    else ex = `Son va boldir suyaklari o'qlari orasidagi og'ish <b>${Math.abs(m.HKA).toFixed(1)}°</b> (normada ${c.type === 'varus' ? '0–3° varus' : '0–2° valgus'}).${m.MAD != null ? ` Yuklama chizig'i tizza markazidan <b>${Math.abs(m.MAD).toFixed(0)} mm ${m.MAD >= 0 ? 'ichkaridan' : 'tashqaridan'}</b> o'tadi — normada 0–15 mm ichkaridan.` : ''} Shu sababli og'irlik tizzaning ${c.type === 'varus' ? 'ichki' : 'tashqi'} qismiga ko'proq tushadi.`;
+    const where = c.where.length ? `<div><span class="eyebrow">Qiyshayish qayerda</span><ul class="where" style="margin-top:6px">${c.where.map(w => `<li><span class="flag out"></span><span>${w.txt}: <span class="num">${w.corr > 0 ? '+' : ''}${w.corr.toFixed(1)}°</span> normadan</span></li>`).join('')}</ul><p class="muted" style="font-size:12.5px;margin:6px 0 0">Raqamlar — normaning o'rtacha qiymatidan farq. Aniq tuzatish rejasi CORA tahlili va klinik ko'rik asosida shifokor tomonidan tuziladi.</p></div>` : (c.type === 'norma' ? '' : `<div class="muted" style="font-size:14px">Alohida suyak burchaklari normada; og'ish bir necha kichik o'zgarishlar yig'indisi bo'lishi mumkin.</div>`);
+    const rk = C.risks(m, c, lld);
+    const risks = rk.length ? `<div><span class="eyebrow">Kelajakda bo'lishi mumkin bo'lgan asoratlar</span><ul class="risks" style="margin-top:8px">${rk.map(r => `<li><span class="meter l${r.lvl}" title="xavf darajasi"><i></i><i></i><i></i></span><div><b>${r.t}</b><p>${r.d}</p></div></li>`).join('')}</ul></div>` : `<div class="notice ok">Hozirgi o'lchovlarda o'q bilan bog'liq alohida xavf belgilari aniqlanmadi.</div>`;
+    return `<article class="card legcard">
+      <header><h2><i class="dot" style="background:${legColor(s)};margin-right:8px"></i>${LEGNAME[s]}</h2><span class="pill g${c.grade}">${c.gradeName}</span></header>
+      <div class="verdict"><div class="big">${Math.abs(m.HKA).toFixed(1)}<small>°</small></div><div><b style="font-size:17px">${typeName}</b><div class="muted" style="font-size:13px">son–boldir o'qlari orasidagi og'ish</div></div></div>
+      ${gauge(m.HKA)}
+      <p class="explain" style="margin:0">${ex}</p>
+      ${where}${risks}
+    </article>`;
+  }
+  function otherLLD(s) {
+    const r = measureAll();
+    return r.R && r.L && r.R.limb != null && r.L.limb != null ? r.R.limb - r.L.limb : null;
+  }
+
+  function renderResults() {
+    const el = $('resultBody');
+    if (!S.study) { el.innerHTML = `<div class="card empty"><b>Hali tasvir yuklanmagan</b><span>MSKT ZIP yoki rentgen suratini yuklang, yoki namuna bilan sinab ko'ring.</span><button class="btn primary" data-goto="upload">Yuklashga o'tish</button></div>`; return bindGoto(el); }
+    const r = measureAll();
+    const f = (v, d = 1) => v == null ? '—' : v.toFixed(d);
+    const rows = [
+      ['HKA (o\'q og\'ishi)', 'HKA', v => f(v) + '° ' + (v > 0 ? 'var' : 'val'), 'varus 0–3° / valgus 0–2°'],
+      ['MAD (yuklama chizig\'i siljishi)', 'MAD', v => f(v, 0) + ' mm ' + (v >= 0 ? 'med' : 'lat'), '8 ± 7 mm medial'],
+      ['mLDFA', 'mLDFA', v => f(v) + '°', '87.5° (85–90°)'],
+      ['mMPTA', 'mMPTA', v => f(v) + '°', '87.5° (85–90°)'],
+      ['JLCA', 'JLCA', v => f(v) + '°', '0–2°'],
+      ['LDTA', 'LDTA', v => f(v) + '°', '89° (86–92°)'],
+      ['Son suyagi uzunligi', 'femur', v => f(v, 0) + ' mm', '—'],
+      ['Boldir uzunligi', 'tibia', v => f(v, 0) + ' mm', '—'],
+      ['Oyoq uzunligi (son boshi–to\'piq)', 'limb', v => f(v, 0) + ' mm', '—'],
+    ];
+    const cell = (m, k, fmt) => {
+      if (!m || m[k] == null) return `<td class="num"><span class="flag na"></span>—</td>`;
+      const ok = C.NORMS[k] ? C.inNorm(k, m[k]) : null;
+      return `<td class="num"><span class="flag ${ok == null ? 'na' : ok ? 'ok' : 'out'}"></span>${fmt(m[k])}</td>`;
+    };
+    const table = `<div class="tbl-wrap"><table class="params"><thead><tr><th>Parametr</th><th>O'ng</th><th>Chap</th><th>Norma</th></tr></thead><tbody>
+      ${rows.map(([n, k, fmt, norm]) => `<tr><td>${n}</td>${cell(r.R, k, fmt)}${cell(r.L, k, fmt)}<td class="muted">${norm}</td></tr>`).join('')}
+      </tbody></table></div>`;
+    const lld = otherLLD();
+    let lldCard = '';
+    if (lld != null) {
+      const a = Math.abs(lld), lvl = a < 10 ? 0 : a < 20 ? 1 : 2;
+      lldCard = `<div class="card" style="display:grid;gap:8px"><span class="eyebrow">Oyoqlar uzunligi</span>
+        <div class="verdict"><div class="big">${a.toFixed(0)}<small> mm</small></div><div><b>${a < 5 ? 'Uzunliklar deyarli teng' : (lld < 0 ? 'O\'ng' : 'Chap') + ' oyoq qisqaroq'}</b><div class="muted" style="font-size:13px">son boshi markazidan to'piq markazigacha</div></div><span class="pill g${lvl}">${['Ahamiyatsiz', 'Yengil farq', 'Sezilarli farq'][lvl]}</span></div>
+        <p class="muted" style="margin:0;font-size:13.5px">10 mm gacha farq ko'pchilikda uchraydi. 20 mm dan ortiq farq tos qiyshayishi va yurish o'zgarishiga olib kelishi mumkin. Tovon va oyoq panjasi bu o'lchovga kirmaydi.</p></div>`;
+    } else if (S.study.mode === 'xr' && !S.mmpp && !S.study.localizer) {
+      lldCard = `<div class="notice warn">Rentgen kalibrlanmagan — MAD va oyoq uzunliklari hisoblanmadi. «Nuqtalar» bo'limida kalibrlang.</div>`;
+    }
+    const notes = [];
+    if (S.demo) notes.push('Bu <b>namuna</b> — sintetik KT asosida. O\'z faylingizni «Yuklash» bo\'limida yuklang.');
+    if (S.study.localizer) notes.push('O\'lchov KT surview (topogramma) bo\'yicha: yotgan holat, oyoqqa og\'irlik tushmagan. Vertikal masshtab aniq, gorizontal masshtab taxminan ±5%. Bo\'g\'im chiziqlari burchaklari ±2–3° aniqlikda.');
+    if (S.study.mode === 'ct') notes.push('MSKT yotgan holatda, oyoqqa og\'irlik tushmaganda olinadi. Tik turgan holatdagi rentgenda varus/valgus odatda bir necha gradusga kattaroq ko\'rinadi, JLCA esa ayniqsa past baholanadi.');
+    if (S.study.info && S.study.info.sliceGap > 2.01) notes.push(`Kesimlar oralig'i ${S.study.info.sliceGap.toFixed(1)} mm: bo'g'im chiziqlari burchaklari taxminan ±2° aniqlikda.`);
+    if (S.auto) notes.push('Nuqtalar avtomatik taklif qilingan va hali tekshirilmagan. Natijaga tayanishdan oldin har bir nuqtani tasvirda tekshiring.');
+    notes.push('Burilish (torsiya) va sagittal tekislikdagi deformatsiya bu versiyada o\'lchanmaydi.');
+    el.innerHTML = `
+      <div class="row" style="justify-content:space-between;margin-bottom:4px">
+        <div><span class="eyebrow">Natija${S.demo ? ' · namuna' : ''}</span><h1 style="font-size:clamp(22px,3vw,30px);font-weight:800;margin-top:4px">${summaryLine(r)}</h1></div>
+        <div class="row"><button class="btn" id="copyRep">Hisobotni nusxalash</button><button class="btn primary" data-goto="3d">3D da solishtirish</button></div>
+      </div>
+      ${S.auto ? `<div class="notice warn" style="margin-bottom:6px">Nuqtalar avtomatik qo'yilgan. <button class="btn small" data-goto="points">Tekshirish</button></div>` : ''}
+      <div class="legs">${legCard('R', r.R)}${legCard('L', r.L)}</div>
+      ${lldCard}
+      <div class="two">
+        <div class="card" style="display:grid;gap:10px"><span class="eyebrow">Shifokor uchun: o'lchovlar</span>${table}
+          <p class="muted" style="font-size:12.5px;margin:0">HKA musbat — varus, manfiy — valgus. MAD musbat — chiziq tizza markazidan medialda. Normalar: Paley (2002), Moreland va hamm. (1987).</p></div>
+        <div class="card" style="display:grid;gap:10px"><span class="eyebrow">Tasvirdagi o'qlar</span><div class="thumb"><canvas id="thumb"></canvas></div></div>
+      </div>
+      <div class="card" style="display:grid;gap:8px"><span class="eyebrow">Muhim eslatmalar</span><ul style="margin:0;padding-left:18px;display:grid;gap:4px;font-size:14px">${notes.map(n => `<li>${n}</li>`).join('')}</ul>
+        <span class="eyebrow" style="margin-top:8px">Manbalar</span>
+        <ol class="refs"><li>Paley D. Principles of Deformity Correction. Springer, 2002.</li><li>Moreland JR, Bassett LW, Hanker GJ. Radiographic analysis of the axial alignment of the lower extremity. J Bone Joint Surg Am. 1987;69(5):745–749.</li><li>Sharma L, Song J, Felson DT, et al. The role of knee alignment in disease progression and functional decline in knee osteoarthritis. JAMA. 2001;286(2):188–195.</li><li>Knutson GA. Anatomic and functional leg-length inequality: a review and recommendation for clinical decision-making. Chiropr Osteopat. 2005;13:11.</li></ol>
+      </div>
+      <textarea id="repText" hidden readonly style="width:100%;min-height:200px" class="card num"></textarea>`;
+    bindGoto(el);
+    $('copyRep').addEventListener('click', () => {
+      const txt = C.reportText(r);
+      const done = () => { $('copyRep').textContent = 'Nusxalandi'; setTimeout(() => { const b = $('copyRep'); if (b) b.textContent = 'Hisobotni nusxalash'; }, 1600); };
+      const fallback = () => { const t = $('repText'); t.hidden = false; t.value = txt; t.focus(); t.select(); $('copyRep').textContent = 'Matnni belgilab nusxalang'; };
+      try { navigator.clipboard.writeText(txt).then(done, fallback); } catch (e) { fallback(); }
+    });
+    drawThumb();
+  }
+  function summaryLine(r) {
+    const parts = [];
+    for (const s of ['R', 'L']) {
+      const m = r[s]; if (!m) continue; const c = C.classify(m);
+      parts.push(`${s === 'R' ? 'O\'ng' : 'Chap'}: ${c.type === 'norma' ? 'norma' : c.type + ' ' + Math.abs(m.HKA).toFixed(1) + '°'}`);
+    }
+    return parts.length ? parts.join(' · ') : 'Nuqtalar to\'liq emas';
+  }
+  function drawThumb() {
+    const c = $('thumb'); if (!c || !S.base) return;
+    const st = S.study, maxH = 520, k = Math.min(1, maxH / st.H), w = Math.round(st.W * k), h = Math.round(st.H * k), d = Math.min(2, window.devicePixelRatio || 1);
+    c.width = w * d; c.height = h * d; c.style.width = w + 'px';
+    const g = c.getContext('2d'); g.setTransform(d, 0, 0, d, 0, 0);
+    g.drawImage(S.base, 0, 0, w, h);
+    drawOverlay(g, p => [p[0] * k, p[1] * k], 0.85, false);
+  }
+  function bindGoto(el) { el.querySelectorAll('[data-goto]').forEach(b => b.addEventListener('click', () => showTab(b.dataset.goto))); }
+  document.querySelectorAll('[data-goto]').forEach(b => b.addEventListener('click', () => showTab(b.dataset.goto)));
+
+  // ---------------- 3D ----------------
+  const stage3 = $('stage3d'), cv3 = $('cv3');
+  const T3 = { ok: false };
+  function init3D() {
+    if (T3.ok) return true;
+    if (typeof THREE === 'undefined') { stage3.insertAdjacentHTML('beforeend', '<div class="empty" style="position:absolute;inset:0;color:var(--lightbox-ink)">3D kutubxonasi yuklanmadi. Internetni tekshiring.</div>'); return false; }
+    const R = new THREE.WebGLRenderer({ canvas: cv3, antialias: true });
+    R.setClearColor(new THREE.Color(css('--lightbox') || '#0c151b'));
+    const scene = new THREE.Scene();
+    const cam = new THREE.PerspectiveCamera(32, 1, 5, 20000);
+    scene.add(new THREE.HemisphereLight(0xffffff, 0x2a3540, 0.85));
+    const dl = new THREE.DirectionalLight(0xffffff, 0.75); dl.position.set(300, 600, 900); scene.add(dl);
+    const dl2 = new THREE.DirectionalLight(0x9fc6d8, 0.35); dl2.position.set(-500, -200, -400); scene.add(dl2);
+    const root = new THREE.Group(); scene.add(root);
+    Object.assign(T3, { ok: true, R, scene, cam, root, orb: { th: 0, ph: 0.08, r: 2000, tgt: new THREE.Vector3() } });
+    // orbit
+    const ps = new Map(); let g0 = null;
+    stage3.addEventListener('pointerdown', e => { if (e.target.closest('.tools')) return; stage3.setPointerCapture(e.pointerId); ps.set(e.pointerId, [e.clientX, e.clientY]); g0 = ps.size === 2 ? { d: dist2(), r: T3.orb.r } : { x: e.clientX, y: e.clientY, th: T3.orb.th, ph: T3.orb.ph }; });
+    stage3.addEventListener('pointermove', e => {
+      if (!ps.has(e.pointerId) || !g0) return; ps.set(e.pointerId, [e.clientX, e.clientY]);
+      if (ps.size === 2 && g0.d) { T3.orb.r = Math.max(200, Math.min(8000, g0.r * g0.d / dist2())); }
+      else if (g0.th != null) { T3.orb.th = g0.th - (e.clientX - g0.x) * 0.008; T3.orb.ph = Math.max(-1.3, Math.min(1.3, g0.ph + (e.clientY - g0.y) * 0.006)); }
+      render3();
+    });
+    const up = e => { ps.delete(e.pointerId); g0 = null; };
+    stage3.addEventListener('pointerup', up); stage3.addEventListener('pointercancel', up);
+    stage3.addEventListener('wheel', e => { e.preventDefault(); T3.orb.r = Math.max(200, Math.min(8000, T3.orb.r * Math.exp(e.deltaY * 0.0012))); render3(); }, { passive: false });
+    function dist2() { const [a, b] = [...ps.values()]; return Math.hypot(a[0] - b[0], a[1] - b[1]); }
+    $('v3front').addEventListener('click', () => { T3.orb.th = 0; T3.orb.ph = 0.08; render3(); });
+    $('v3side').addEventListener('click', () => { T3.orb.th = Math.PI / 2; T3.orb.ph = 0.08; render3(); });
+    $('v3fit').addEventListener('click', () => { fit3(); render3(); });
+    return true;
+  }
+  function size3D() {
+    if (!T3.ok) return;
+    const w = stage3.clientWidth, h = stage3.clientHeight; if (!w) return;
+    T3.R.setPixelRatio(Math.min(2, window.devicePixelRatio || 1)); T3.R.setSize(w, h, false);
+    T3.cam.aspect = w / h; T3.cam.updateProjectionMatrix(); render3();
+  }
+  function render3() {
+    if (!T3.ok) return;
+    const o = T3.orb, c = T3.cam;
+    c.position.set(o.tgt.x + o.r * Math.sin(o.th) * Math.cos(o.ph), o.tgt.y + o.r * Math.sin(o.ph), o.tgt.z + o.r * Math.cos(o.th) * Math.cos(o.ph));
+    c.lookAt(o.tgt); T3.R.render(T3.scene, c);
+  }
+  function show3D() {
+    if (!S.study) { stage3.querySelector('.empty') || stage3.insertAdjacentHTML('beforeend', '<div class="empty" style="position:absolute;inset:0;color:var(--lightbox-ink)">Avval tasvir yuklang yoki namunani oching.</div>'); return; }
+    const e = stage3.querySelector('.empty'); if (e) e.remove();
+    if (!init3D()) return;
+    $('layerChips').querySelector('[data-layer="cloud"]').hidden = !S.study.cloud;
+    if (!S.study.cloud) S.layers.schema = true;
+    syncChips();
+    size3D();
+    if (S.dirty3d) { build3D(true); S.dirty3d = false; }
+    else render3();
+  }
+
+  const V3 = (p, z = 0) => new THREE.Vector3(p[0], p[1], z);
+  function mats() {
+    if (T3.mats) return T3.mats;
+    T3.mats = {
+      bone: new THREE.MeshStandardMaterial({ color: 0xe9dfc9, roughness: 0.65, metalness: 0 }),
+      ghost: new THREE.MeshStandardMaterial({ color: 0x3fd28e, roughness: 0.6, transparent: true, opacity: 0.22, depthWrite: false }),
+      axis: new THREE.MeshBasicMaterial({ color: 0xff4d5e }),
+      naxis: new THREE.MeshBasicMaterial({ color: 0x3fd28e }),
+      knee: new THREE.MeshBasicMaterial({ color: 0xffffff }),
+    };
+    return T3.mats;
+  }
+  function cylT(a, b, r1, r2, mat, seg = 18) {
+    const d = new THREE.Vector3().subVectors(b, a), L = d.length();
+    const m = new THREE.Mesh(new THREE.CylinderGeometry(r2, r1, L, seg), mat);
+    m.position.copy(a).addScaledVector(d, 0.5);
+    m.quaternion.setFromUnitVectors(new THREE.Vector3(0, 1, 0), d.normalize());
+    return m;
+  }
+  function sph(p, r, mat, sx = 1, sy = 1, sz = 1) { const m = new THREE.Mesh(new THREE.SphereGeometry(r, 24, 16), mat); m.position.copy(p); m.scale.set(sx, sy, sz); return m; }
+  function boxAlong(a, b, h, dpt, mat, center) {
+    const d = new THREE.Vector3().subVectors(b, a), L = d.length() + 8;
+    const m = new THREE.Mesh(new THREE.BoxGeometry(L, h, dpt), mat);
+    m.position.copy(center); m.rotation.z = Math.atan2(d.y, d.x);
+    return m;
+  }
+  const unit2 = v => { const l = Math.hypot(v[0], v[1]) || 1; return [v[0] / l, v[1] / l]; };
+  const add2 = (a, v, k) => [a[0] + v[0] * k, a[1] + v[1] * k];
+  function rotAbout(p, c, deg) { const q = C.rot([p[0] - c[0], p[1] - c[1]], deg); return [q[0] + c[0], q[1] + c[1]]; }
+
+  // geometriya (mm, y yuqoriga) + tuzatish ulushi
+  function legState(g, frac) {
+    const f = [g.Kf[0] - g.H[0], g.Kf[1] - g.H[1]], t = [g.Ac[0] - g.Kt[0], g.Ac[1] - g.Kt[1]];
+    const th = Math.atan2(t[0] * f[1] - t[1] * f[0], t[0] * f[0] + t[1] * f[1]) * 180 / Math.PI;
+    const deg = th * frac, c = g.Kc, o = { ...g, theta: th };
+    for (const k of ['tm', 'tl', 'Kt', 'Ac', 'am', 'al']) o[k] = rotAbout(g[k], c, deg);
+    return o;
+  }
+  function schematic(g, mat) {
+    const grp = new THREE.Group();
+    const up = unit2([g.H[0] - g.Kf[0], g.H[1] - g.Kf[1]]), dn = unit2([g.Ac[0] - g.Kt[0], g.Ac[1] - g.Kt[1]]);
+    const lat = -g.med, latT = unit2([g.tl[0] - g.tm[0], g.tl[1] - g.tm[1]]);
+    const Tr = [g.H[0] + lat * 46, g.H[1] - 36];
+    grp.add(sph(V3(g.H), 22, mat));
+    grp.add(cylT(V3(g.H), V3(Tr), 12, 13, mat));
+    grp.add(sph(V3(Tr), 17, mat, 1, 1.25, 1));
+    const S1 = add2(g.Kf, up, 70);
+    grp.add(cylT(V3(Tr), V3(S1), 14, 13, mat));
+    grp.add(cylT(V3(S1), V3(add2(g.Kf, up, 22)), 13, 30, mat));
+    grp.add(sph(V3(add2(g.fm, up, 17)), 17, mat, 1, 1, 1.7));
+    grp.add(sph(V3(add2(g.fl, up, 17)), 17, mat, 1, 1, 1.7));
+    const Kt = g.Kt;
+    grp.add(boxAlong(V3(g.tm), V3(g.tl), 16, 56, mat, V3(add2([(g.tm[0] + g.tl[0]) / 2, (g.tm[1] + g.tl[1]) / 2], dn, 9))));
+    const M1 = add2(Kt, dn, 70), D1 = add2(g.Ac, dn, -45);
+    grp.add(cylT(V3(add2(Kt, dn, 16)), V3(M1), 29, 13, mat));
+    grp.add(cylT(V3(M1), V3(D1), 12, 12, mat));
+    grp.add(cylT(V3(D1), V3(add2(g.Ac, dn, -8)), 12, 19, mat));
+    grp.add(boxAlong(V3(g.am), V3(g.al), 12, 38, mat, V3(add2([(g.am[0] + g.al[0]) / 2, (g.am[1] + g.al[1]) / 2], dn, -6))));
+    grp.add(sph(V3(add2(g.am, dn, 5)), 7, mat));
+    grp.add(sph(V3(add2(g.Ac, dn, 17)), 16, mat, 1.15, 0.8, 1.5));
+    grp.add(cylT(V3(add2(add2(Kt, latT, 30), dn, 26), 8), V3(add2(add2(g.Ac, latT, 25), dn, 12), 8), 6, 6, mat, 10));
+    return grp;
+  }
+  function axisGroup(g, mat) {
+    const grp = new THREE.Group();
+    grp.add(cylT(V3(g.H, 30), V3(g.Ac, 30), 2, 2, mat, 8));
+    grp.add(sph(V3([(g.Kf[0] + g.Kt[0]) / 2, (g.Kf[1] + g.Kt[1]) / 2], 30), 5, mats().knee));
+    return grp;
+  }
+
+  function build3D(refit) {
+    const M = mats(), root = T3.root;
+    while (root.children.length) { const c = root.children.pop(); c.traverse(o => { if (o.geometry) o.geometry.dispose(); }); }
+    const res = measureAll();
+    T3.legs = {};
+    for (const s of ['R', 'L']) if (res[s]) T3.legs[s] = res[s].geo;
+    const vis = s => S.focus === 'both' || S.focus === s;
+    const frac = S.corr / 100;
+    T3.schema = new THREE.Group(); T3.norm = new THREE.Group(); T3.axes = new THREE.Group();
+    for (const s of Object.keys(T3.legs)) {
+      if (!vis(s)) continue;
+      const g = T3.legs[s], cur = legState(g, frac), ideal = legState(g, 1);
+      T3.schema.add(schematic(cur, M.bone));
+      T3.norm.add(schematic(ideal, M.ghost));
+      T3.axes.add(axisGroup(cur, M.axis));
+      if (frac < 0.999) T3.axes.add(axisGroup(ideal, M.naxis));
+    }
+    root.add(T3.schema, T3.norm, T3.axes);
+    // KT nuqtalar buluti
+    T3.cloud = null;
+    const st = S.study;
+    if (st.cloud) {
+      if (!T3.cloudSrc || T3.cloudSrc.src !== st.cloud) prepCloud(st.cloud);
+      const src = T3.cloudSrc, n = src.n, pos = new Float32Array(n * 3);
+      let w = 0;
+      const rot = {};
+      for (const s of Object.keys(T3.legs)) { const cur = legState(T3.legs[s], frac), d = cur.theta * frac * Math.PI / 180; rot[s] = { c: T3.legs[s].Kc, cs: Math.cos(d), sn: Math.sin(d) }; }
+      const col = new Float32Array(n * 3);
+      for (let i = 0; i < n; i++) {
+        const s = src.leg[i]; if (!vis(s)) continue;
+        let x = src.p[i * 3], y = src.p[i * 3 + 1]; const z = src.p[i * 3 + 2];
+        const r = rot[s];
+        if (r && y < r.c[1]) { const dx = x - r.c[0], dy = y - r.c[1]; x = r.c[0] + dx * r.cs - dy * r.sn; y = r.c[1] + dx * r.sn + dy * r.cs; }
+        pos[w * 3] = x; pos[w * 3 + 1] = y; pos[w * 3 + 2] = z;
+        col[w * 3] = src.c[i * 3]; col[w * 3 + 1] = src.c[i * 3 + 1]; col[w * 3 + 2] = src.c[i * 3 + 2]; w++;
+      }
+      const geo = new THREE.BufferGeometry();
+      geo.setAttribute('position', new THREE.BufferAttribute(pos.subarray(0, w * 3), 3));
+      geo.setAttribute('color', new THREE.BufferAttribute(col.subarray(0, w * 3), 3));
+      T3.cloud = new THREE.Points(geo, new THREE.PointsMaterial({ size: src.size, vertexColors: true, sizeAttenuation: true }));
+      root.add(T3.cloud);
+    }
+    applyLayers();
+    if (refit) fit3();
+    render3();
+  }
+  function prepCloud(arr) {
+    const n = arr.length / 3, p = new Float32Array(arr.length), leg = new Array(n), c = new Float32Array(arr.length);
+    const legs = T3.legs, mid = legs.R && legs.L ? (legs.R.H[0] + legs.L.H[0]) / 2 : (S.study.W * S.mmpp) / 2;
+    let zmin = Infinity, zmax = -Infinity;
+    for (let i = 0; i < n; i++) { const z = -arr[i * 3 + 2]; if (z < zmin) zmin = z; if (z > zmax) zmax = z; }
+    for (let i = 0; i < n; i++) {
+      p[i * 3] = arr[i * 3]; p[i * 3 + 1] = arr[i * 3 + 1]; p[i * 3 + 2] = -arr[i * 3 + 2];
+      leg[i] = arr[i * 3] < mid ? 'R' : 'L';
+      const t = 0.62 + 0.38 * (p[i * 3 + 2] - zmin) / Math.max(1, zmax - zmin);
+      c[i * 3] = 1.0 * t; c[i * 3 + 1] = 0.94 * t; c[i * 3 + 2] = 0.84 * t;
+    }
+    T3.cloudSrc = { src: arr, n, p, leg, c, size: Math.max(2.5, (S.study.info && S.study.info.psx ? S.study.info.psx : 1) * Math.ceil((S.study.info.cols || 512) / 128) * 1.7) };
+  }
+  function applyLayers() {
+    mats().ghost.opacity = (T3.cloud && S.layers.cloud) ? 0.13 : 0.24;
+    if (T3.cloud) T3.cloud.visible = S.layers.cloud;
+    T3.schema.visible = S.layers.schema || !T3.cloud;
+    T3.norm.visible = S.layers.norm;
+    T3.axes.visible = S.layers.axes;
+  }
+  function fit3() {
+    const box = new THREE.Box3();
+    T3.root.traverse(o => { if (o.isMesh || o.isPoints) box.expandByObject(o); });
+    if (box.isEmpty()) return;
+    const c = box.getCenter(new THREE.Vector3()), sz = box.getSize(new THREE.Vector3());
+    T3.orb.tgt.copy(c);
+    const h = Math.max(sz.y, sz.x / Math.max(0.3, T3.cam.aspect));
+    T3.orb.r = h / 2 / Math.tan(T3.cam.fov * Math.PI / 360) * 1.12;
+  }
+  function syncChips() { $('layerChips').querySelectorAll('.chip').forEach(b => b.setAttribute('aria-pressed', S.layers[b.dataset.layer] ? 'true' : 'false')); }
+  $('layerChips').addEventListener('click', e => { const b = e.target.closest('.chip'); if (!b) return; S.layers[b.dataset.layer] = !S.layers[b.dataset.layer]; syncChips(); if (T3.ok) { applyLayers(); render3(); } });
+  $('focusSeg').addEventListener('click', e => { const b = e.target.closest('button'); if (!b) return; S.focus = b.dataset.f; $('focusSeg').querySelectorAll('button').forEach(x => x.setAttribute('aria-pressed', x === b ? 'true' : 'false')); if (T3.ok) build3D(true); });
+  let corrRaf = 0;
+  $('corr').addEventListener('input', e => { S.corr = +e.target.value; if (!T3.ok) return; cancelAnimationFrame(corrRaf); corrRaf = requestAnimationFrame(() => build3D(false)); });
+
+  // ---------------- Boshlash ----------------
+  renderList();
+  updateLive();
+  loadDemo(false).then(() => {
+    let t = 'upload'; try { t = localStorage.getItem('oyoq-tab') || 'upload'; } catch (e) { }
+    if (t !== 'upload' && tabs.includes(t)) showTab(t);
+  });
+})();
+
+</script>
+
+<script>if("serviceWorker" in navigator){addEventListener("load",()=>navigator.serviceWorker.register("sw.js").catch(()=>{}))}</script>
+</html>
