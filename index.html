@@ -167,7 +167,7 @@ table.params td.num{white-space:nowrap}
 .legend i{width:22px;height:4px;border-radius:2px;display:inline-block}
 .empty{display:grid;place-items:center;text-align:center;gap:10px;padding:40px 16px;color:var(--muted)}
 footer.disc{font-size:12.5px;color:var(--muted);padding-block:6px 30px}
-@media (max-width:640px){nav.steps{width:100%;margin-left:0}nav.steps button{flex:1;justify-content:center;padding:7px 6px;font-size:13px;gap:4px}nav.steps button .n{display:none}.brand small{display:none}.hero>div:last-child{order:-1}}
+@media (max-width:640px){.seg.lang{margin-left:auto}nav.steps{width:100%;margin-left:0}nav.steps button{flex:1;justify-content:center;padding:7px 6px;font-size:13px;gap:4px}nav.steps button .n{display:none}.brand small{display:none}.hero>div:last-child{order:-1}}
 .rot-in{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:8px}
 @media (max-width:520px){.rot-in{grid-template-columns:repeat(3,minmax(0,1fr))}}
 .rot-in label{display:grid;gap:3px;font-size:12px;color:var(--muted);font-weight:600}
@@ -178,6 +178,7 @@ footer.disc{font-size:12.5px;color:var(--muted);padding-block:6px 30px}
 .rv b{font-family:var(--f-num);font-size:20px}
 .rv small{font-size:12px;color:var(--muted)}
 .st-hi{color:var(--bad)} .st-lo{color:var(--accent)} .st-ok{color:var(--ok)}
+.seg.lang button{padding:5px 9px;font-size:12px;font-weight:700;letter-spacing:.04em}
 @media (prefers-reduced-motion: reduce){*{transition:none!important}}
 </style>
 
@@ -188,6 +189,7 @@ footer.disc{font-size:12.5px;color:var(--muted);padding-block:6px 30px}
       <div><b>Oyoq O'qi</b><small>MSKT bo'yicha oyoq o'qi tahlili</small></div>
       <span class="demo-flag" id="demoFlag" hidden>Namuna</span>
     </div>
+    <div class="seg lang" role="group" aria-label="Til / Язык" id="langSeg"><button data-lang="uz" aria-pressed="true">UZ</button><button data-lang="ru" aria-pressed="false">RU</button></div>
     <nav class="steps" role="tablist" aria-label="Bosqichlar">
       <button role="tab" id="t-upload" aria-selected="true" data-tab="upload"><span class="n">1</span>Yuklash</button>
       <button role="tab" id="t-points" aria-selected="false" data-tab="points"><span class="n">2</span>Nuqtalar</button>
@@ -378,6 +380,7 @@ footer.disc{font-size:12.5px;color:var(--muted);padding-block:6px 30px}
 </main>
 <footer class="wrap disc">Oyoq O'qi — o'quv va yordamchi vosita. Tashxis qo'ymaydi va davolash rejasini almashtirmaydi; natijani ortoped-travmatolog tekshirishi shart.</footer>
 
+<script>try{window.OYOQ_LANG=localStorage.getItem('oyoq-lang')||'uz'}catch(e){window.OYOQ_LANG='uz'}</script>
 <script src="jszip.min.js"></script>
 <script src="dicomParser.min.js"></script>
 <script src="three.min.js"></script>
@@ -398,6 +401,10 @@ var S=Object.defineProperty;var A=(a,t)=>{for(var e in t)S(a,e,{get:t[e],enumera
   'use strict';
   const DP = () => (typeof dicomParser !== 'undefined' ? dicomParser : root.dicomParser);
   const JZ = () => (typeof JSZip !== 'undefined' ? JSZip : root.JSZip);
+
+  // Til: 'uz' (standart) yoki 'ru'. L(uz, ru) — joriy tildagi matn
+  const lang = () => (root.OYOQ_LANG === 'ru' ? 'ru' : 'uz');
+  const L = (uz, ru) => (lang() === 'ru' ? ru : uz);
 
   const UNCOMPRESSED = {
     '1.2.840.10008.1.2': 'le',
@@ -859,11 +866,11 @@ var S=Object.defineProperty;var A=(a,t)=>{for(var e in t)S(a,e,{get:t[e],enumera
       grade = a <= 5 ? 1 : a <= 10 ? 2 : 3;
     }
     const where = [];
-    if (!inNorm('mLDFA', m.mLDFA)) where.push({ k: 'femur', txt: m.mLDFA > 90 ? 'son suyagi pastki qismi — varus' : 'son suyagi pastki qismi — valgus', corr: m.mLDFA - 87.5 });
-    if (!inNorm('mMPTA', m.mMPTA)) where.push({ k: 'tibia', txt: m.mMPTA < 85 ? 'katta boldir suyagi yuqori qismi — varus' : 'katta boldir suyagi yuqori qismi — valgus', corr: 87.5 - m.mMPTA });
-    if (Math.abs(m.JLCA) > 2) where.push({ k: 'joint', txt: m.JLCA > 0 ? 'bo\'g\'im ichi: tashqi tomon ochilgan (boylam bo\'shligi yoki ichki tog\'ay yemirilishi)' : 'bo\'g\'im ichi: ichki tomon ochilgan', corr: m.JLCA });
-    if (!inNorm('LDTA', m.LDTA)) where.push({ k: 'ankle', txt: 'katta boldir pastki qismi (to\'piq usti)', corr: m.LDTA - 89 });
-    return { type, grade, dev, where, gradeName: ['Norma', 'Yengil', 'O\'rta', 'Og\'ir'][grade] };
+    if (!inNorm('mLDFA', m.mLDFA)) where.push({ k: 'femur', txt: m.mLDFA > 90 ? L('son suyagi pastki qismi — varus', 'дистальный отдел бедренной кости — варус') : L('son suyagi pastki qismi — valgus', 'дистальный отдел бедренной кости — вальгус'), corr: m.mLDFA - 87.5 });
+    if (!inNorm('mMPTA', m.mMPTA)) where.push({ k: 'tibia', txt: m.mMPTA < 85 ? L('katta boldir suyagi yuqori qismi — varus', 'проксимальный отдел большеберцовой кости — варус') : L('katta boldir suyagi yuqori qismi — valgus', 'проксимальный отдел большеберцовой кости — вальгус'), corr: 87.5 - m.mMPTA });
+    if (Math.abs(m.JLCA) > 2) where.push({ k: 'joint', txt: m.JLCA > 0 ? L('bo\'g\'im ichi: tashqi tomon ochilgan (boylam bo\'shligi yoki ichki tog\'ay yemirilishi)', 'внутрисуставной компонент: раскрытие латерально (слабость связок или износ медиального хряща)') : L('bo\'g\'im ichi: ichki tomon ochilgan', 'внутрисуставной компонент: раскрытие медиально'), corr: m.JLCA });
+    if (!inNorm('LDTA', m.LDTA)) where.push({ k: 'ankle', txt: L('katta boldir pastki qismi (to\'piq usti)', 'дистальный отдел большеберцовой кости (надлодыжечная область)'), corr: m.LDTA - 89 });
+    return { type, grade, dev, where, gradeName: (lang() === 'ru' ? ['Норма', 'Лёгкая', 'Средняя', 'Тяжёлая'] : ['Norma', 'Yengil', 'O\'rta', 'Og\'ir'])[grade] };
   }
 
   // Xavflar: umumiy ilmiy bog'liqliklar asosida, shaxsiy bashorat emas
@@ -873,18 +880,18 @@ var S=Object.defineProperty;var A=(a,t)=>{for(var e in t)S(a,e,{get:t[e],enumera
     const a = Math.abs(m.HKA);
     const lvl = a > 10 ? 3 : a > 5 ? 2 : 1;
     if (cls.type === 'varus') {
-      r.push({ lvl, t: 'Tizzaning ichki qismida artroz', d: 'Og\'irlik tizzaning ichki (medial) bo\'limiga ko\'proq tushadi. Tadqiqotlarda varus o\'q mavjud medial artrozning tezroq rivojlanishi bilan bog\'liq.' });
-      r.push({ lvl: Math.max(1, lvl - 1), t: 'Ichki meniskning zo\'riqishi', d: 'Ichki menisk va tog\'ayga doimiy ortiqcha bosim yemirilishni tezlashtirishi mumkin.' });
-      if (m.JLCA > 2 || a > 8) r.push({ lvl: 2, t: 'Tashqi boylamlarning cho\'zilishi', d: 'Yurganda tizzaning tashqariga "silkinishi" (lateral thrust) va beqarorlik hissi paydo bo\'lishi mumkin.' });
-      r.push({ lvl: 1, t: 'To\'piq va oyoq panjasida kompensatsiya', d: 'Uzoq muddatda to\'piq osti bo\'g\'imida moslashuvchan o\'zgarishlar kuzatilishi mumkin.' });
+      r.push({ lvl, t: L('Tizzaning ichki qismida artroz', 'Артроз медиального отдела коленного сустава'), d: L('Og\'irlik tizzaning ichki (medial) bo\'limiga ko\'proq tushadi. Tadqiqotlarda varus o\'q mavjud medial artrozning tezroq rivojlanishi bilan bog\'liq.', 'Нагрузка смещается на медиальный отдел колена. В исследованиях варусная ось связана с более быстрым прогрессированием медиального гонартроза.') });
+      r.push({ lvl: Math.max(1, lvl - 1), t: L('Ichki meniskning zo\'riqishi', 'Перегрузка медиального мениска'), d: L('Ichki menisk va tog\'ayga doimiy ortiqcha bosim yemirilishni tezlashtirishi mumkin.', 'Постоянная избыточная нагрузка на медиальный мениск и хрящ может ускорить их износ.') });
+      if (m.JLCA > 2 || a > 8) r.push({ lvl: 2, t: L('Tashqi boylamlarning cho\'zilishi', 'Растяжение латеральных связок'), d: L('Yurganda tizzaning tashqariga "silkinishi" (lateral thrust) va beqarorlik hissi paydo bo\'lishi mumkin.', 'При ходьбе может появиться латеральный «толчок» колена (lateral thrust) и ощущение нестабильности.') });
+      r.push({ lvl: 1, t: L('To\'piq va oyoq panjasida kompensatsiya', 'Компенсация в голеностопе и стопе'), d: L('Uzoq muddatda to\'piq osti bo\'g\'imida moslashuvchan o\'zgarishlar kuzatilishi mumkin.', 'В долгосрочной перспективе возможны компенсаторные изменения в подтаранном суставе.') });
     } else if (cls.type === 'valgus') {
-      r.push({ lvl, t: 'Tizzaning tashqi qismida artroz', d: 'Og\'irlik tashqi (lateral) bo\'limga ko\'proq tushadi, tashqi tog\'ay tezroq yemirilishi mumkin.' });
-      r.push({ lvl: Math.max(1, lvl - 1), t: 'Tizza qopqog\'i (patella) beqarorligi', d: 'Valgusda patellaning tashqariga siljishi va old tizza og\'rig\'i ko\'proq uchraydi.' });
-      r.push({ lvl: 1, t: 'Ichki boylamga yuklama va yassi oyoqlik', d: 'Ichki yon boylam zo\'riqadi, oyoq panjasi ichkariga yotishi kuchayishi mumkin.' });
+      r.push({ lvl, t: L('Tizzaning tashqi qismida artroz', 'Артроз латерального отдела коленного сустава'), d: L('Og\'irlik tashqi (lateral) bo\'limga ko\'proq tushadi, tashqi tog\'ay tezroq yemirilishi mumkin.', 'Нагрузка смещается на латеральный отдел, латеральный хрящ может изнашиваться быстрее.') });
+      r.push({ lvl: Math.max(1, lvl - 1), t: L('Tizza qopqog\'i (patella) beqarorligi', 'Нестабильность надколенника'), d: L('Valgusda patellaning tashqariga siljishi va old tizza og\'rig\'i ko\'proq uchraydi.', 'При вальгусе чаще встречаются латеральный подвывих надколенника и передняя боль в колене.') });
+      r.push({ lvl: 1, t: L('Ichki boylamga yuklama va yassi oyoqlik', 'Нагрузка на медиальную связку и плоскостопие'), d: L('Ichki yon boylam zo\'riqadi, oyoq panjasi ichkariga yotishi kuchayishi mumkin.', 'Перегружается медиальная коллатеральная связка, может усиливаться пронация стопы.') });
     }
     if (lld && Math.abs(lld) >= 10) {
-      const L = Math.abs(lld) >= 20 ? 2 : 1;
-      r.push({ lvl: L, t: 'Oyoqlar uzunligi farqi oqibatlari', d: 'Tos qiyshayishi, umurtqaning funksional qiyshayishi, bel va son-chanoq bo\'g\'imi og\'rig\'i, yurishning o\'zgarishi.' });
+      const Lv = Math.abs(lld) >= 20 ? 2 : 1;
+      r.push({ lvl: Lv, t: L('Oyoqlar uzunligi farqi oqibatlari', 'Последствия разницы длины ног'), d: L('Tos qiyshayishi, umurtqaning funksional qiyshayishi, bel va son-chanoq bo\'g\'imi og\'rig\'i, yurishning o\'zgarishi.', 'Перекос таза, функциональный сколиоз, боли в пояснице и тазобедренном суставе, изменение походки.') });
     }
     return r;
   }
@@ -992,7 +999,7 @@ var S=Object.defineProperty;var A=(a,t)=>{for(var e in t)S(a,e,{get:t[e],enumera
       if (opts.keepRaw) p.raw = Int16Array.from(hu);
       slices.push(p);
     };
-    const result = () => ({ uid: 'demo', rows, cols, ori: [1, 0, 0, 0, 1, 0], ps: [psx, psx], ds, slices, desc: 'Namuna (sintetik)', patient: 'Namuna bemor', date: '' });
+    const result = () => ({ uid: 'demo', rows, cols, ori: [1, 0, 0, 0, 1, 0], ps: [psx, psx], ds, slices, desc: L('Namuna (sintetik)', 'Пример (синтетический)'), patient: L('Namuna bemor', 'Пример пациента'), date: '' });
     if (opts._async) return { zs, doSlice, result };
     zs.forEach(doSlice);
     return result();
@@ -1009,22 +1016,24 @@ var S=Object.defineProperty;var A=(a,t)=>{for(var e in t)S(a,e,{get:t[e],enumera
   // Hisobot matni
   function reportText(res) {
     const f = v => v == null ? '—' : v.toFixed(1);
-    const lines = ['OYOQ O\'QI — o\'lchov natijalari (taxminiy, shifokor tasdig\'i talab qilinadi)', ''];
+    const lines = [L('OYOQ O\'QI — o\'lchov natijalari (taxminiy, shifokor tasdig\'i talab qilinadi)', 'OYOQ O\'QI — результаты измерений (ориентировочно, требуется подтверждение врача)'), ''];
     for (const s of ['R', 'L']) {
       const m = res[s]; if (!m) continue;
       const c = classify(m);
-      lines.push((s === 'R' ? 'O\'NG' : 'CHAP') + ' OYOQ: ' + (c.type === 'norma' ? 'norma doirasida' : c.type.toUpperCase() + ' ' + Math.abs(m.HKA).toFixed(1) + '°, daraja: ' + c.gradeName));
-      lines.push('  HKA ' + f(m.HKA) + '° (+varus) | MAD ' + f(m.MAD) + ' mm medial | mLDFA ' + f(m.mLDFA) + '° | mMPTA ' + f(m.mMPTA) + '° | JLCA ' + f(m.JLCA) + '° | LDTA ' + f(m.LDTA) + '°');
-      if (m.limb) lines.push('  Uzunlik (son boshi–to\'piq markazi): ' + f(m.limb) + ' mm (son ' + f(m.femur) + ', boldir ' + f(m.tibia) + ')');
+      const side = s === 'R' ? L('O\'NG OYOQ', 'ПРАВАЯ НОГА') : L('CHAP OYOQ', 'ЛЕВАЯ НОГА');
+      const typ = c.type === 'varus' ? L('VARUS', 'ВАРУС') : L('VALGUS', 'ВАЛЬГУС');
+      lines.push(side + ': ' + (c.type === 'norma' ? L('norma doirasida', 'в пределах нормы') : typ + ' ' + Math.abs(m.HKA).toFixed(1) + '°, ' + L('daraja', 'степень') + ': ' + c.gradeName));
+      lines.push('  HKA ' + f(m.HKA) + '° (+' + L('varus', 'варус') + ') | MAD ' + f(m.MAD) + ' mm ' + L('medial', 'медиально') + ' | mLDFA ' + f(m.mLDFA) + '° | mMPTA ' + f(m.mMPTA) + '° | JLCA ' + f(m.JLCA) + '° | LDTA ' + f(m.LDTA) + '°');
+      if (m.limb) lines.push('  ' + L('Uzunlik (son boshi–to\'piq markazi)', 'Длина (центр головки бедра – центр голеностопа)') + ': ' + f(m.limb) + ' mm (' + L('son', 'бедро') + ' ' + f(m.femur) + ', ' + L('boldir', 'голень') + ' ' + f(m.tibia) + ')');
       for (const w of c.where) lines.push('  • ' + w.txt + ' (' + (w.corr > 0 ? '+' : '') + w.corr.toFixed(1) + '°)');
     }
-    if (res.R && res.L && res.R.limb && res.L.limb) lines.push('', 'Uzunlik farqi: ' + Math.abs(res.R.limb - res.L.limb).toFixed(1) + ' mm (' + (res.R.limb < res.L.limb ? 'o\'ng' : 'chap') + ' qisqa)');
-    lines.push('', 'Eslatma: KT yotgan holatda olinadi; tik turgan holatdagi rentgenda varus odatda kattaroq ko\'rinadi.');
+    if (res.R && res.L && res.R.limb && res.L.limb) lines.push('', L('Uzunlik farqi', 'Разница длины') + ': ' + Math.abs(res.R.limb - res.L.limb).toFixed(1) + ' mm (' + (res.R.limb < res.L.limb ? L('o\'ng', 'правая') : L('chap', 'левая')) + ' ' + L('qisqa', 'короче') + ')');
+    lines.push('', L('Eslatma: KT yotgan holatda olinadi; tik turgan holatdagi rentgenda varus odatda kattaroq ko\'rinadi.', 'Примечание: КТ выполняется лёжа; на рентгенограмме стоя варус обычно больше.'));
     return lines.join('\n');
   }
 
   const api = {
-    readZip, readSlice, rotation, rotStatus, suggestCorrection, axisAngle, bagirovFromAxes, ROT_NORMS, buildStudy, studyFromGray, studyFromLocalizer, autoLandmarks, measureLeg, legGeometry, classify, risks,
+    L, readZip, readSlice, rotation, rotStatus, suggestCorrection, axisAngle, bagirovFromAxes, ROT_NORMS, buildStudy, studyFromGray, studyFromLocalizer, autoLandmarks, measureLeg, legGeometry, classify, risks,
     makeDemoSlices, demoLegGeometry, DEMO_DESIGN, NORMS, KEYS, inNorm, reportText, rot, BONE_HU,
   };
   root.OyoqCore = api;
@@ -1038,16 +1047,29 @@ var S=Object.defineProperty;var A=(a,t)=>{for(var e in t)S(a,e,{get:t[e],enumera
   const C = window.OyoqCore;
   const $ = id => document.getElementById(id);
   const KEYS = C.KEYS;
-  const LM = {
-    hip: { s: 'Son boshi', t: 'Son suyagi boshining markazi', d: 'Son-chanoq bo\'g\'imidagi yumaloq son suyagi boshining aynan o\'rtasiga bosing. Kattalashtirib, aylananing markazini toping.' },
-    f1: { s: 'Son kondili ①', t: 'Son kondillari — pastki nuqtalar', d: 'Tizzada son suyagining ichki va tashqi bo\'rtiqlari (kondillar) eng pastki nuqtasiga bittadan nuqta qo\'ying.' },
-    f2: { s: 'Son kondili ②', t: 'Son kondillari — pastki nuqtalar', d: 'Ikkinchi kondilning eng pastki nuqtasi. Tartib muhim emas — dastur ichki va tashqini o\'zi ajratadi.' },
-    t1: { s: 'Boldir platosi ①', t: 'Katta boldir platosi', d: 'Tizza tirqishidan pastdagi katta boldir suyagi yuqori yuzasining ichki va tashqi chetlari.' },
-    t2: { s: 'Boldir platosi ②', t: 'Katta boldir platosi', d: 'Platoning ikkinchi cheti.' },
-    a1: { s: 'To\'piq ①', t: 'To\'piq bo\'g\'imi (plafond)', d: 'Katta boldir suyagining pastki bo\'g\'im yuzasi — ichki va tashqi chekkasi. Ularning o\'rtasi to\'piq markazi bo\'ladi.' },
-    a2: { s: 'To\'piq ②', t: 'To\'piq bo\'g\'imi (plafond)', d: 'Plafondning ikkinchi chekkasi.' },
+  const L = C.L;
+  const LM_ = {
+    uz: {
+      hip: { s: 'Son boshi', t: 'Son suyagi boshining markazi', d: 'Son-chanoq bo\'g\'imidagi yumaloq son suyagi boshining aynan o\'rtasiga bosing. Kattalashtirib, aylananing markazini toping.' },
+      f1: { s: 'Son kondili ①', t: 'Son kondillari — pastki nuqtalar', d: 'Tizzada son suyagining ichki va tashqi bo\'rtiqlari (kondillar) eng pastki nuqtasiga bittadan nuqta qo\'ying.' },
+      f2: { s: 'Son kondili ②', t: 'Son kondillari — pastki nuqtalar', d: 'Ikkinchi kondilning eng pastki nuqtasi. Tartib muhim emas — dastur ichki va tashqini o\'zi ajratadi.' },
+      t1: { s: 'Boldir platosi ①', t: 'Katta boldir platosi', d: 'Tizza tirqishidan pastdagi katta boldir suyagi yuqori yuzasining ichki va tashqi chetlari.' },
+      t2: { s: 'Boldir platosi ②', t: 'Katta boldir platosi', d: 'Platoning ikkinchi cheti.' },
+      a1: { s: 'To\'piq ①', t: 'To\'piq bo\'g\'imi (plafond)', d: 'Katta boldir suyagining pastki bo\'g\'im yuzasi — ichki va tashqi chekkasi. Ularning o\'rtasi to\'piq markazi bo\'ladi.' },
+      a2: { s: 'To\'piq ②', t: 'To\'piq bo\'g\'imi (plafond)', d: 'Plafondning ikkinchi chekkasi.' },
+    },
+    ru: {
+      hip: { s: 'Головка бедра', t: 'Центр головки бедренной кости', d: 'Нажмите точно в центр головки бедренной кости в тазобедренном суставе. Увеличьте изображение и найдите центр окружности.' },
+      f1: { s: 'Мыщелок бедра ①', t: 'Мыщелки бедра — дистальные точки', d: 'Поставьте по одной точке на самые нижние точки медиального и латерального мыщелков бедра.' },
+      f2: { s: 'Мыщелок бедра ②', t: 'Мыщелки бедра — дистальные точки', d: 'Самая нижняя точка второго мыщелка. Порядок не важен — программа сама определит медиальный и латеральный.' },
+      t1: { s: 'Плато ББК ①', t: 'Плато большеберцовой кости', d: 'Медиальный и латеральный края суставной поверхности большеберцовой кости под суставной щелью.' },
+      t2: { s: 'Плато ББК ②', t: 'Плато большеберцовой кости', d: 'Второй край плато.' },
+      a1: { s: 'Голеностоп ①', t: 'Голеностопный сустав (плафон)', d: 'Медиальный и латеральный края дистальной суставной поверхности большеберцовой кости. Их середина — центр голеностопа.' },
+      a2: { s: 'Голеностоп ②', t: 'Голеностопный сустав (плафон)', d: 'Второй край плафона.' },
+    },
   };
-  const LEGNAME = { R: 'O\'ng oyoq', L: 'Chap oyoq' };
+  const LM = new Proxy({}, { get: (_, k) => LM_[C.L('uz', 'ru')][k] });
+  const LEGNAME = new Proxy({}, { get: (_, k) => ({ R: L('O\'ng oyoq', 'Правая нога'), L: L('Chap oyoq', 'Левая нога') })[k] });
   const css = n => getComputedStyle(document.documentElement).getPropertyValue(n).trim();
 
   const S = {
@@ -1093,54 +1115,54 @@ var S=Object.defineProperty;var A=(a,t)=>{for(var e in t)S(a,e,{get:t[e],enumera
   async function handleZip(file) {
     S.seq++;
     setMsg('', ''); $('seriesCard').hidden = true; $('studyCard').hidden = true;
-    if (typeof JSZip === 'undefined' || typeof dicomParser === 'undefined') { setMsg('bad', 'Kutubxonalar yuklanmadi. Internet aloqasini tekshirib, sahifani yangilang.'); return; }
-    progress('ZIP o\'qilmoqda…', 0.02, file.name + ' · ' + (file.size / 1048576).toFixed(0) + ' MB');
+    if (typeof JSZip === 'undefined' || typeof dicomParser === 'undefined') { setMsg('bad', L('Kutubxonalar yuklanmadi. Internet aloqasini tekshirib, sahifani yangilang.', 'Библиотеки не загрузились. Проверьте интернет и обновите страницу.')); return; }
+    progress(L('ZIP o\'qilmoqda…', 'Чтение ZIP…'), 0.02, file.name + ' · ' + (file.size / 1048576).toFixed(0) + ' MB');
     try {
-      const r = await C.readZip(file, p => progress('Kesimlar o\'qilmoqda…', p, Math.round(p * 100) + '%'));
+      const r = await C.readZip(file, p => progress(L('Kesimlar o\'qilmoqda…', 'Чтение срезов…'), p, Math.round(p * 100) + '%'));
       S.zipResult = r;
       S.axSeries = (r.series[0] && r.series[0].slices[0] && r.series[0].slices[0].entry) ? r.series[0] : null; S.axDirty = true;
       $('loadCard').hidden = true;
       const locs = r.localizers || [];
       const axLen = x => { const zs = x.slices.map(q => q.z); return Math.max(...zs) - Math.min(...zs); };
       if (!r.series.length && !locs.length) {
-        if (r.compressed) setMsg('bad', `<b>Tasvirlar qo'llab-quvvatlanmaydigan siqilgan formatda</b> (${r.compressedTS}). RadiAnt yoki boshqa DICOM dasturi orqali «siqilmagan» (uncompressed) formatda qayta eksport qilib, ZIP qiling.`);
-        else setMsg('bad', `<b>Mos KT seriyasi topilmadi.</b> ZIP ichida ${r.total} ta fayl bor edi. Ko'ndalang (axial) kesimlardan iborat, kamida 20 ta kesimli seriya yoki butun oyoq surview'i kerak.`);
+        if (r.compressed) setMsg('bad', L(`<b>Tasvirlar qo'llab-quvvatlanmaydigan siqilgan formatda</b> (${r.compressedTS}). RadiAnt yoki boshqa DICOM dasturi orqali «siqilmagan» (uncompressed) formatda qayta eksport qilib, ZIP qiling.`, `<b>Изображения в неподдерживаемом сжатом формате</b> (${r.compressedTS}). Переэкспортируйте их без сжатия (uncompressed) через RadiAnt или другую DICOM-программу и заархивируйте в ZIP.`));
+        else setMsg('bad', L(`<b>Mos KT seriyasi topilmadi.</b> ZIP ichida ${r.total} ta fayl bor edi. Ko'ndalang (axial) kesimlardan iborat, kamida 20 ta kesimli seriya yoki butun oyoq surview'i kerak.`, `<b>Подходящая серия КТ не найдена.</b> В ZIP было файлов: ${r.total}. Нужна аксиальная серия не менее 20 срезов или топограмма всей ноги.`));
         return;
       }
-      if (r.compressed) setMsg('warn', `${r.compressed} ta fayl siqilgan format sababli o'tkazib yuborildi.`);
+      if (r.compressed) setMsg('warn', L(`${r.compressed} ta fayl siqilgan format sababli o'tkazib yuborildi.`, `Пропущено файлов в сжатом формате: ${r.compressed}.`));
       const best = r.series[0], bestLen = best ? axLen(best) : 0;
       // aksial seriya butun oyoqni qamramasa — surview bo'yicha tahlil
       if (locs.length && bestLen < 600 && locs[0].lenmm > bestLen) {
-        setMsg('warn', `<b>Aksial kesimlar faqat ${(bestLen / 10).toFixed(0)} sm sohani qamraydi</b> — butun oyoq o'qini o'lchash uchun yetmaydi. Shu sababli tahlil <b>surview (topogramma)</b> bo'yicha ochildi: u ${(locs[0].lenmm / 10).toFixed(0)} sm ni qamraydi. Nuqtalarni qo'lda qo'ying.`);
+        setMsg('warn', L(`<b>Aksial kesimlar faqat ${(bestLen / 10).toFixed(0)} sm sohani qamraydi</b> — butun oyoq o'qini o'lchash uchun yetmaydi. Shu sababli tahlil <b>surview (topogramma)</b> bo'yicha ochildi: u ${(locs[0].lenmm / 10).toFixed(0)} sm ni qamraydi. Nuqtalarni qo'lda qo'ying.`, `<b>Аксиальные срезы охватывают только ${(bestLen / 10).toFixed(0)} см</b> — этого недостаточно для оси всей ноги. Поэтому анализ открыт по <b>топограмме (surview)</b>, она охватывает ${(locs[0].lenmm / 10).toFixed(0)} см. Расставьте точки вручную.`));
         return openLocalizer(locs[0]);
       }
       if (r.series.length === 1 && !locs.length) return openSeries(r.series[0]);
       const sel = $('seriesSel'); sel.innerHTML = '';
       r.series.forEach((s, i) => {
         const o = document.createElement('option'); o.value = 's' + i;
-        o.textContent = `${s.desc || 'Seriya'} — ${s.slices.length} kesim, ${(axLen(s) / 10).toFixed(0)} sm`;
+        o.textContent = `${s.desc || L('Seriya', 'Серия')} — ${s.slices.length} ${L('kesim', 'срезов')}, ${(axLen(s) / 10).toFixed(0)} ${L('sm', 'см')}`;
         sel.appendChild(o);
       });
-      locs.forEach((L, i) => { const o = document.createElement('option'); o.value = 'l' + i; o.textContent = `Surview (${L.desc}) — ${(L.lenmm / 10).toFixed(0)} sm`; sel.appendChild(o); });
+      locs.forEach((Lc, i) => { const o = document.createElement('option'); o.value = 'l' + i; o.textContent = `Surview (${Lc.desc}) — ${(Lc.lenmm / 10).toFixed(0)} ${L('sm', 'см')}`; sel.appendChild(o); });
       $('seriesCard').hidden = false;
     } catch (e) {
       console.error(e); $('loadCard').hidden = true;
-      setMsg('bad', '<b>Faylni o\'qib bo\'lmadi.</b> Bu ZIP arxiv ekanini va ichida DICOM fayllar borligini tekshiring. (' + (e.message || e) + ')');
+      setMsg('bad', L('<b>Faylni o\'qib bo\'lmadi.</b> Bu ZIP arxiv ekanini va ichida DICOM fayllar borligini tekshiring. (', '<b>Не удалось прочитать файл.</b> Проверьте, что это ZIP-архив с DICOM-файлами внутри. (') + (e.message || e) + ')');
     }
   }
   $('seriesGo').addEventListener('click', () => {
     const v = $('seriesSel').value, i = +v.slice(1);
     if (v[0] === 'l') openLocalizer(S.zipResult.localizers[i]); else openSeries(S.zipResult.series[i]);
   });
-  function openLocalizer(L) {
-    const st = C.studyFromLocalizer(L);
+  function openLocalizer(Lc) {
+    const st = C.studyFromLocalizer(Lc);
     setStudy(st, false, { noAuto: true });
     showStudyCard();
     showTab('points');
   }
 
   function openSeries(s) {
-    progress('Tasvir yasalmoqda…', 0.9);
+    progress(L('Tasvir yasalmoqda…', 'Построение изображения…'), 0.9);
     setTimeout(() => {
       const st = C.buildStudy(s);
       $('loadCard').hidden = true;
@@ -1153,26 +1175,25 @@ var S=Object.defineProperty;var A=(a,t)=>{for(var e in t)S(a,e,{get:t[e],enumera
   function showStudyCard() {
     const st = S.study, i = st.info || {}, c = $('studyCard');
     if (st.localizer) {
-      c.innerHTML = `<b>Ochilgan tasvir: surview</b><dl class="kv"><dt>Tavsif</dt><dd>${esc(i.desc || '—')}</dd><dt>Bemor</dt><dd>${esc((i.patient || '—').replace(/\^/g, ' '))}</dd><dt>Uzunlik</dt><dd class="num">${(i.lenmm / 10).toFixed(0)} sm</dd><dt>Piksel</dt><dd class="num">${(+i.psCol).toFixed(2)} mm</dd></dl>
-        <div class="notice warn">Surview — past dozali proyeksiya, ko'rinish aniqligi ~1 mm. Bo'g'im chiziqlari burchaklari ±2–3° gacha xato berishi mumkin; HKA va MAD ishonchliroq.</div>`;
+      c.innerHTML = `<b>${L('Ochilgan tasvir: surview', 'Открыто изображение: топограмма')}</b><dl class="kv"><dt>${L('Tavsif', 'Описание')}</dt><dd>${esc(i.desc || '—')}</dd><dt>${L('Bemor', 'Пациент')}</dt><dd>${esc((i.patient || '—').replace(/\^/g, ' '))}</dd><dt>${L('Uzunlik', 'Длина')}</dt><dd class="num">${(i.lenmm / 10).toFixed(0)} ${L('sm', 'см')}</dd><dt>${L('Piksel', 'Пиксель')}</dt><dd class="num">${(+i.psCol).toFixed(2)} mm</dd></dl>
+        <div class="notice warn">${L('Surview — past dozali proyeksiya, ko\'rinish aniqligi ~1 mm. Bo\'g\'im chiziqlari burchaklari ±2–3° gacha xato berishi mumkin; HKA va MAD ishonchliroq.', 'Топограмма — низкодозная проекция с разрешением ~1 мм. Углы суставных линий могут иметь погрешность до ±2–3°; HKA и MAD надёжнее.')}</div>`;
       c.style.display = 'grid'; c.style.gap = '10px'; c.hidden = false; return;
     }
     if (st.mode !== 'ct') { c.hidden = true; return; }
     const warns = [];
-    if (i.sliceGap > 2.01) warns.push(`Kesimlar oralig'i ${i.sliceGap.toFixed(1)} mm — bo'g'im chiziqlari burchaklari (mLDFA, mMPTA, JLCA) taxminan ±2° xatolik bilan o'lchanadi. 1–1.5 mm bo'lsa aniqroq.`);
+    if (i.sliceGap > 2.01) warns.push(L(`Kesimlar oralig'i ${i.sliceGap.toFixed(1)} mm — bo'g'im chiziqlari burchaklari (mLDFA, mMPTA, JLCA) taxminan ±2° xatolik bilan o'lchanadi. 1–1.5 mm bo'lsa aniqroq.`, `Шаг срезов ${i.sliceGap.toFixed(1)} мм — углы суставных линий (mLDFA, mMPTA, JLCA) измеряются с погрешностью около ±2°. При 1–1,5 мм точнее.`));
     const lenmm = st.H * st.mmpp;
-    if (lenmm < 700) warns.push(`Seriya uzunligi ${(lenmm / 10).toFixed(0)} sm. Butun oyoq (son boshidan to'piqgacha) tushmagan bo'lishi mumkin.`);
-    c.innerHTML = `<b>Ochilgan seriya</b>
-      <dl class="kv"><dt>Tavsif</dt><dd>${esc(i.desc || '—')}</dd><dt>Bemor</dt><dd>${esc((i.patient || '—').replace(/\^/g, ' '))}</dd>
-      <dt>Kesimlar</dt><dd class="num">${i.slices} · ${i.cols}×${i.rows}</dd><dt>Piksel / qadam</dt><dd class="num">${(+i.psx).toFixed(2)} mm / ${(+i.sliceGap).toFixed(2)} mm</dd>
-      <dt>Uzunlik</dt><dd class="num">${(lenmm / 10).toFixed(1)} sm</dd></dl>
+    if (lenmm < 700) warns.push(L(`Seriya uzunligi ${(lenmm / 10).toFixed(0)} sm. Butun oyoq (son boshidan to'piqgacha) tushmagan bo'lishi mumkin.`, `Длина серии ${(lenmm / 10).toFixed(0)} см. Вся нога (от головки бедра до голеностопа) может не входить.`));
+    c.innerHTML = `<b>${L('Ochilgan seriya', 'Открытая серия')}</b>
+      <dl class="kv"><dt>${L('Tavsif', 'Описание')}</dt><dd>${esc(i.desc || '—')}</dd><dt>${L('Bemor', 'Пациент')}</dt><dd>${esc((i.patient || '—').replace(/\^/g, ' '))}</dd>
+      <dt>${L('Kesimlar', 'Срезы')}</dt><dd class="num">${i.slices} · ${i.cols}×${i.rows}</dd><dt>${L('Piksel / qadam', 'Пиксель / шаг')}</dt><dd class="num">${(+i.psx).toFixed(2)} mm / ${(+i.sliceGap).toFixed(2)} mm</dd>
+      <dt>${L('Uzunlik', 'Длина')}</dt><dd class="num">${(lenmm / 10).toFixed(1)} ${L('sm', 'см')}</dd></dl>
       ${warns.map(w => `<div class="notice warn">${w}</div>`).join('')}`;
     c.style.display = 'grid'; c.style.gap = '10px'; c.hidden = false;
   }
 
   function handleImage(file) {
     S.seq++;
-    setMsg('', '');
     const url = URL.createObjectURL(file), img = new Image();
     img.onload = () => {
       const maxD = 2400, k = Math.min(1, maxD / Math.max(img.width, img.height));
@@ -1186,17 +1207,18 @@ var S=Object.defineProperty;var A=(a,t)=>{for(var e in t)S(a,e,{get:t[e],enumera
       st.info = { desc: file.name };
       setStudy(st, false);
       $('studyCard').hidden = true;
-      setMsg('warn', 'Rentgen surati yuklandi. Burchaklar o\'lchanadi; MAD va uzunliklar uchun «Nuqtalar» bo\'limida kalibrlang. Dastur rasmda bemorning o\'ng tomoni chapda turibdi deb hisoblaydi.');
+      setMsg('warn', L('Rentgen surati yuklandi. Burchaklar o\'lchanadi; MAD va uzunliklar uchun «Nuqtalar» bo\'limida kalibrlang. Dastur rasmda bemorning o\'ng tomoni chapda turibdi deb hisoblaydi.', 'Рентгенограмма загружена. Углы измеряются; для MAD и длин выполните калибровку в разделе «Точки». Программа считает, что правая сторона пациента на снимке слева.'));
       showTab('points');
     };
-    img.onerror = () => setMsg('bad', 'Rasmni ochib bo\'lmadi. JPG yoki PNG fayl tanlang.');
+    img.onerror = () => setMsg('bad', L('Rasmni ochib bo\'lmadi. JPG yoki PNG fayl tanlang.', 'Не удалось открыть изображение. Выберите файл JPG или PNG.'));
     img.src = url;
   }
 
   async function loadDemo(go) {
     const seq = ++S.seq;
-    progress('Namuna tayyorlanmoqda…', 0.02, 'Sintetik KT: o\'ng oyoqda tibial varus, chap oyoq deyarli norma');
-    const s = await C.makeDemoSlices({ async: true, onProgress: p => progress('Namuna tayyorlanmoqda…', p, 'Sintetik KT: o\'ng oyoqda tibial varus, chap oyoq deyarli norma') });
+    const dt = () => L('Namuna tayyorlanmoqda…', 'Подготовка примера…'), dn = () => L('Sintetik KT: o\'ng oyoqda tibial varus, chap oyoq deyarli norma', 'Синтетическая КТ: справа тибиальный варус, слева почти норма');
+    progress(dt(), 0.02, dn());
+    const s = await C.makeDemoSlices({ async: true, onProgress: p => progress(dt(), p, dn()) });
     if (seq !== S.seq) return; // foydalanuvchi bu orada o'z faylini ochdi
     const st = C.buildStudy(s);
     $('loadCard').hidden = true;
@@ -1287,18 +1309,18 @@ var S=Object.defineProperty;var A=(a,t)=>{for(var e in t)S(a,e,{get:t[e],enumera
       const done = !!S.pts[S.leg][k], cur = S.target && S.target.leg === S.leg && S.target.key === k;
       if (done) b.classList.add('done');
       if (cur) b.setAttribute('aria-current', 'step');
-      b.innerHTML = `<span class="st">${done ? '✓' : ''}</span><span>${LM[k].s}</span><small>${cur ? 'bosing' : done ? 'qayta' : ''}</small>`;
+      b.innerHTML = `<span class="st">${done ? '✓' : ''}</span><span>${LM[k].s}</span><small>${cur ? L('bosing', 'нажмите') : done ? L('qayta', 'заново') : ''}</small>`;
       b.addEventListener('click', () => { S.target = { leg: S.leg, key: k }; renderList(); draw(); });
       li.appendChild(b); ul.appendChild(li);
     }
     const t = S.target && S.target.leg === S.leg ? LM[S.target.key] : null;
-    $('guideTitle').textContent = t ? t.t : 'Barcha nuqtalar qo\'yilgan';
-    $('guideText').textContent = t ? t.d : 'Nuqtani barmoq bilan surib aniqlashtiring yoki ro\'yxatdan tanlab qaytadan qo\'ying.';
+    $('guideTitle').textContent = t ? t.t : L('Barcha nuqtalar qo\'yilgan', 'Все точки расставлены');
+    $('guideText').textContent = t ? t.d : L('Nuqtani barmoq bilan surib aniqlashtiring yoki ro\'yxatdan tanlab qaytadan qo\'ying.', 'Уточните точку, перетащив её пальцем, или выберите в списке и поставьте заново.');
     drawMini(S.target && S.target.leg === S.leg ? S.target.key : null);
     const tip = $('tip');
-    if (S.cal.active) tip.textContent = `Kalibrlash: ${S.cal.p.length + 1}-nuqtani bosing`;
-    else if (S.target) tip.textContent = `${LEGNAME[S.target.leg]}: ${LM[S.target.key].s} — rasmga bosing`;
-    else tip.textContent = S.auto ? 'Nuqtalar avtomatik taklif qilindi — har birini tekshiring va kerak bo\'lsa suring' : 'Nuqtani surib aniqlashtiring';
+    if (S.cal.active) tip.textContent = L(`Kalibrlash: ${S.cal.p.length + 1}-nuqtani bosing`, `Калибровка: поставьте точку ${S.cal.p.length + 1}`);
+    else if (S.target) tip.textContent = `${LEGNAME[S.target.leg]}: ${LM[S.target.key].s} — ${L('rasmga bosing', 'нажмите на снимок')}`;
+    else tip.textContent = S.auto ? L('Nuqtalar avtomatik taklif qilindi — har birini tekshiring va kerak bo\'lsa suring', 'Точки предложены автоматически — проверьте каждую и при необходимости сдвиньте') : L('Nuqtani surib aniqlashtiring', 'Уточните точку перетаскиванием');
   }
 
   function drawMini(active) {
@@ -1336,12 +1358,13 @@ var S=Object.defineProperty;var A=(a,t)=>{for(var e in t)S(a,e,{get:t[e],enumera
     const r = measureAll(), box = $('liveBox');
     box.innerHTML = ['R', 'L'].map(s => {
       const m = r[s];
-      if (!m) return `<div><span class="muted" style="font-size:12px">${LEGNAME[s]}</span><br><span class="muted">nuqtalar to'liq emas</span></div>`;
+      if (!m) return `<div><span class="muted" style="font-size:12px">${LEGNAME[s]}</span><br><span class="muted">${L('nuqtalar to\'liq emas', 'точки не все')}</span></div>`;
       const c = C.classify(m);
-      return `<div><span class="muted" style="font-size:12px">${LEGNAME[s]} · HKA</span><br><b>${fmtDev(m.HKA)}</b> <span class="pill g${c.grade}" style="font-size:11px;padding:1px 7px">${c.type === 'norma' ? 'norma' : c.type}</span></div>`;
+      return `<div><span class="muted" style="font-size:12px">${LEGNAME[s]} · HKA</span><br><b>${fmtDev(m.HKA)}</b> <span class="pill g${c.grade}" style="font-size:11px;padding:1px 7px">${typeWord(c.type)}</span></div>`;
     }).join('');
   }
   const fmtDev = v => Math.abs(v).toFixed(1) + '°';
+  const typeWord = t => t === 'varus' ? L('varus', 'варус') : t === 'valgus' ? L('valgus', 'вальгус') : L('norma', 'норма');
 
   // ---------------- Tasvir ko'rgich (pan/zoom/nuqtalar) ----------------
   const stage = $('stage'), cv = $('cv'), ctx = cv.getContext('2d');
@@ -1380,7 +1403,7 @@ var S=Object.defineProperty;var A=(a,t)=>{for(var e in t)S(a,e,{get:t[e],enumera
       if (ps.length === 2) { ctx.beginPath(); ctx.moveTo(...ps[0]); ctx.lineTo(...ps[1]); ctx.stroke(); }
     }
     if (loupe) drawLoupe(loupe);
-    $('hudInfo').textContent = S.demo ? 'NAMUNA' : (S.study.mode === 'ct' ? 'MSKT' : S.study.localizer ? 'SURVIEW' : 'RENTGEN');
+    $('hudInfo').textContent = S.demo ? L('NAMUNA', 'ПРИМЕР') : (S.study.mode === 'ct' ? L('MSKT', 'МСКТ') : S.study.localizer ? 'SURVIEW' : L('RENTGEN', 'РЕНТГЕН'));
   }
 
   function legColor(s) { return s === 'R' ? css('--pt-r') : css('--pt-l'); }
@@ -1404,7 +1427,7 @@ var S=Object.defineProperty;var A=(a,t)=>{for(var e in t)S(a,e,{get:t[e],enumera
         if (m && Kf && Kt) {
           const Kc = T(mid(Kf, Kt));
           const c = C.classify(m);
-          const txt = `${Math.abs(m.HKA).toFixed(1)}° ${c.type === 'norma' ? 'norma' : c.type}`;
+          const txt = `${Math.abs(m.HKA).toFixed(1)}° ${typeWord(c.type)}`;
           g.font = `700 ${13 * k}px ${css('--f-num')}`;
           const tw = g.measureText(txt).width, dir = s === 'R' ? -1 : 1;
           let x = Kc[0] + dir * 34 * k - (dir < 0 ? tw : 0); const y = Kc[1] - 30 * k;
@@ -1533,7 +1556,7 @@ var S=Object.defineProperty;var A=(a,t)=>{for(var e in t)S(a,e,{get:t[e],enumera
     updateCalState(); changed();
   }
   function updateCalState() {
-    $('calState').textContent = S.mmpp ? `Kalibrlangan: 1 piksel = ${S.mmpp.toFixed(3)} mm` : 'Kalibrlanmagan: faqat burchaklar ko\'rsatiladi.';
+    $('calState').textContent = S.mmpp ? L(`Kalibrlangan: 1 piksel = ${S.mmpp.toFixed(3)} mm`, `Откалибровано: 1 пиксель = ${S.mmpp.toFixed(3)} мм`) : L('Kalibrlanmagan: faqat burchaklar ko\'rsatiladi.', 'Без калибровки: показываются только углы.');
   }
 
   // ---------------- Natija ----------------
@@ -1543,30 +1566,33 @@ var S=Object.defineProperty;var A=(a,t)=>{for(var e in t)S(a,e,{get:t[e],enumera
     const pos = d => { const t = Math.PI - (Math.max(-15, Math.min(15, d)) + 15) / 30 * Math.PI; return [cx + R * Math.cos(t), cy - R * Math.sin(t)]; };
     const arc = (a, b, col, w) => { const p = pos(a), q = pos(b); return `<path d="M${p[0].toFixed(1)} ${p[1].toFixed(1)} A${R} ${R} 0 0 1 ${q[0].toFixed(1)} ${q[1].toFixed(1)}" stroke="${col}" stroke-width="${w}" fill="none"/>`; };
     const n = pos(v), ticks = [-15, -10, -5, 0, 5, 10, 15].map(t => { const p = pos(t), q = [cx + (p[0] - cx) * 1.12, cy + (p[1] - cy) * 1.12]; return `<text x="${q[0].toFixed(1)}" y="${(q[1] + 4).toFixed(1)}" text-anchor="middle" font-size="11" fill="var(--muted)" font-family="var(--f-num)">${Math.abs(t)}</text>`; }).join('');
-    return `<svg class="gauge" viewBox="0 0 ${W} 178" role="img" aria-label="Og'ish: ${v.toFixed(1)} daraja">
+    return `<svg class="gauge" viewBox="0 0 ${W} 178" role="img" aria-label="${L('Og\'ish', 'Отклонение')}: ${v.toFixed(1)}°">
       ${arc(-15, -10, 'var(--bad)', 16)}${arc(-10, -5, 'var(--warn)', 16)}${arc(-5, -2, 'color-mix(in srgb,var(--warn) 55%,var(--ok))', 16)}${arc(-2, 3, 'var(--ok)', 16)}${arc(3, 5, 'color-mix(in srgb,var(--warn) 55%,var(--ok))', 16)}${arc(5, 10, 'var(--warn)', 16)}${arc(10, 15, 'var(--bad)', 16)}
       ${ticks}
       <line x1="${cx}" y1="${cy}" x2="${n[0].toFixed(1)}" y2="${n[1].toFixed(1)}" stroke="var(--ink)" stroke-width="3.5" stroke-linecap="round"/>
       <circle cx="${cx}" cy="${cy}" r="7" fill="var(--ink)"/>
-      <text x="22" y="174" font-size="12" font-weight="700" fill="var(--muted)">X-shakl (valgus)</text>
-      <text x="298" y="174" font-size="12" font-weight="700" fill="var(--muted)" text-anchor="end">O-shakl (varus)</text>
-      <text x="${cx}" y="22" font-size="11" font-weight="700" fill="var(--ok)" text-anchor="middle">NORMA</text>
+      <text x="22" y="174" font-size="12" font-weight="700" fill="var(--muted)">${L('X-shakl (valgus)', 'X-образная (вальгус)')}</text>
+      <text x="298" y="174" font-size="12" font-weight="700" fill="var(--muted)" text-anchor="end">${L('O-shakl (varus)', 'O-образная (варус)')}</text>
+      <text x="${cx}" y="22" font-size="11" font-weight="700" fill="var(--ok)" text-anchor="middle">${L('NORMA', 'НОРМА')}</text>
     </svg>`;
   }
 
   function legCard(s, m) {
-    if (!m) return `<article class="card legcard"><header><h2>${LEGNAME[s]}</h2></header><div class="empty"><span>Bu oyoq uchun nuqtalar to'liq qo'yilmagan.</span><button class="btn" data-goto="points">Nuqtalarni qo'yish</button></div></article>`;
+    if (!m) return `<article class="card legcard"><header><h2>${LEGNAME[s]}</h2></header><div class="empty"><span>${L('Bu oyoq uchun nuqtalar to\'liq qo\'yilmagan.', 'Для этой ноги расставлены не все точки.')}</span><button class="btn" data-goto="points">${L('Nuqtalarni qo\'yish', 'Расставить точки')}</button></div></article>`;
     const c = C.classify(m), lld = otherLLD(s);
-    const typeName = c.type === 'varus' ? 'varus — O-simon oyoq' : c.type === 'valgus' ? 'valgus — X-simon oyoq' : 'o\'q normada';
+    const typeName = c.type === 'varus' ? L('varus — O-simon oyoq', 'варус — O-образные ноги') : c.type === 'valgus' ? L('valgus — X-simon oyoq', 'вальгус — X-образные ноги') : L('o\'q normada', 'ось в норме');
     let ex;
-    if (c.type === 'norma') ex = `Son boshi va to'piqni tutashtiruvchi yuklama chizig'i tizza markaziga yaqin o'tadi${m.MAD != null ? ` (${Math.abs(m.MAD).toFixed(0)} mm ${m.MAD >= 0 ? 'ichkarida' : 'tashqarida'}; normada 0–15 mm ichkarida)` : ''}. Son va boldir o'qlari orasidagi og'ish ${Math.abs(m.HKA).toFixed(1)}°.`;
-    else ex = `Son va boldir suyaklari o'qlari orasidagi og'ish <b>${Math.abs(m.HKA).toFixed(1)}°</b> (normada ${c.type === 'varus' ? '0–3° varus' : '0–2° valgus'}).${m.MAD != null ? ` Yuklama chizig'i tizza markazidan <b>${Math.abs(m.MAD).toFixed(0)} mm ${m.MAD >= 0 ? 'ichkaridan' : 'tashqaridan'}</b> o'tadi — normada 0–15 mm ichkaridan.` : ''} Shu sababli og'irlik tizzaning ${c.type === 'varus' ? 'ichki' : 'tashqi'} qismiga ko'proq tushadi.`;
-    const where = c.where.length ? `<div><span class="eyebrow">Qiyshayish qayerda</span><ul class="where" style="margin-top:6px">${c.where.map(w => `<li><span class="flag out"></span><span>${w.txt}: <span class="num">${w.corr > 0 ? '+' : ''}${w.corr.toFixed(1)}°</span> normadan</span></li>`).join('')}</ul><p class="muted" style="font-size:12.5px;margin:6px 0 0">Raqamlar — normaning o'rtacha qiymatidan farq. Aniq tuzatish rejasi CORA tahlili va klinik ko'rik asosida shifokor tomonidan tuziladi.</p></div>` : (c.type === 'norma' ? '' : `<div class="muted" style="font-size:14px">Alohida suyak burchaklari normada; og'ish bir necha kichik o'zgarishlar yig'indisi bo'lishi mumkin.</div>`);
+    const mad = m.MAD != null ? Math.abs(m.MAD).toFixed(0) : null, hka = Math.abs(m.HKA).toFixed(1), inn = m.MAD >= 0;
+    if (c.type === 'norma') ex = L(`Son boshi va to'piqni tutashtiruvchi yuklama chizig'i tizza markaziga yaqin o'tadi${mad != null ? ` (${mad} mm ${inn ? 'ichkarida' : 'tashqarida'}; normada 0–15 mm ichkarida)` : ''}. Son va boldir o'qlari orasidagi og'ish ${hka}°.`,
+      `Механическая ось (от центра головки бедра до голеностопа) проходит близко к центру колена${mad != null ? ` (${mad} мм ${inn ? 'медиально' : 'латерально'}; в норме 0–15 мм медиально)` : ''}. Отклонение между осями бедра и голени ${hka}°.`);
+    else ex = L(`Son va boldir suyaklari o'qlari orasidagi og'ish <b>${hka}°</b> (normada ${c.type === 'varus' ? '0–3° varus' : '0–2° valgus'}).${mad != null ? ` Yuklama chizig'i tizza markazidan <b>${mad} mm ${inn ? 'ichkaridan' : 'tashqaridan'}</b> o'tadi — normada 0–15 mm ichkaridan.` : ''} Shu sababli og'irlik tizzaning ${c.type === 'varus' ? 'ichki' : 'tashqi'} qismiga ko'proq tushadi.`,
+      `Отклонение между осями бедренной и большеберцовой костей <b>${hka}°</b> (в норме ${c.type === 'varus' ? '0–3° варус' : '0–2° вальгус'}).${mad != null ? ` Механическая ось проходит <b>${mad} мм ${inn ? 'медиальнее' : 'латеральнее'}</b> центра колена — в норме 0–15 мм медиально.` : ''} Поэтому нагрузка больше приходится на ${c.type === 'varus' ? 'медиальный' : 'латеральный'} отдел колена.`);
+    const where = c.where.length ? `<div><span class="eyebrow">${L('Qiyshayish qayerda', 'Локализация деформации')}</span><ul class="where" style="margin-top:6px">${c.where.map(w => `<li><span class="flag out"></span><span>${w.txt}: <span class="num">${w.corr > 0 ? '+' : ''}${w.corr.toFixed(1)}°</span> ${L('normadan', 'от нормы')}</span></li>`).join('')}</ul><p class="muted" style="font-size:12.5px;margin:6px 0 0">${L('Raqamlar — normaning o\'rtacha qiymatidan farq. Aniq tuzatish rejasi CORA tahlili va klinik ko\'rik asosida shifokor tomonidan tuziladi.', 'Числа — отклонение от среднего значения нормы. Точный план коррекции составляет врач на основе анализа CORA и клинического осмотра.')}</p></div>` : (c.type === 'norma' ? '' : `<div class="muted" style="font-size:14px">${L('Alohida suyak burchaklari normada; og\'ish bir necha kichik o\'zgarishlar yig\'indisi bo\'lishi mumkin.', 'Углы отдельных сегментов в норме; отклонение может быть суммой нескольких небольших изменений.')}</div>`);
     const rk = C.risks(m, c, lld);
-    const risks = rk.length ? `<div><span class="eyebrow">Kelajakda bo'lishi mumkin bo'lgan asoratlar</span><ul class="risks" style="margin-top:8px">${rk.map(r => `<li><span class="meter l${r.lvl}" title="xavf darajasi"><i></i><i></i><i></i></span><div><b>${r.t}</b><p>${r.d}</p></div></li>`).join('')}</ul></div>` : `<div class="notice ok">Hozirgi o'lchovlarda o'q bilan bog'liq alohida xavf belgilari aniqlanmadi.</div>`;
+    const risks = rk.length ? `<div><span class="eyebrow">${L('Kelajakda bo\'lishi mumkin bo\'lgan asoratlar', 'Возможные последствия в будущем')}</span><ul class="risks" style="margin-top:8px">${rk.map(r => `<li><span class="meter l${r.lvl}" title="${L('xavf darajasi', 'уровень риска')}"><i></i><i></i><i></i></span><div><b>${r.t}</b><p>${r.d}</p></div></li>`).join('')}</ul></div>` : `<div class="notice ok">${L('Hozirgi o\'lchovlarda o\'q bilan bog\'liq alohida xavf belgilari aniqlanmadi.', 'По текущим измерениям признаков риска, связанных с осью, не выявлено.')}</div>`;
     return `<article class="card legcard">
       <header><h2><i class="dot" style="background:${legColor(s)};margin-right:8px"></i>${LEGNAME[s]}</h2><span class="pill g${c.grade}">${c.gradeName}</span></header>
-      <div class="verdict"><div class="big">${Math.abs(m.HKA).toFixed(1)}<small>°</small></div><div><b style="font-size:17px">${typeName}</b><div class="muted" style="font-size:13px">son–boldir o'qlari orasidagi og'ish</div></div></div>
+      <div class="verdict"><div class="big">${Math.abs(m.HKA).toFixed(1)}<small>°</small></div><div><b style="font-size:17px">${typeName}</b><div class="muted" style="font-size:13px">${L('son–boldir o\'qlari orasidagi og\'ish', 'отклонение между осями бедра и голени')}</div></div></div>
       ${gauge(m.HKA)}
       <p class="explain" style="margin:0">${ex}</p>
       ${where}${risks}
@@ -1579,68 +1605,68 @@ var S=Object.defineProperty;var A=(a,t)=>{for(var e in t)S(a,e,{get:t[e],enumera
 
   function renderResults() {
     const el = $('resultBody');
-    if (!S.study) { el.innerHTML = `<div class="card empty"><b>Hali tasvir yuklanmagan</b><span>MSKT ZIP yoki rentgen suratini yuklang, yoki namuna bilan sinab ko'ring.</span><button class="btn primary" data-goto="upload">Yuklashga o'tish</button></div>`; return bindGoto(el); }
+    if (!S.study) { el.innerHTML = `<div class="card empty"><b>${L('Hali tasvir yuklanmagan', 'Изображение ещё не загружено')}</b><span>${L('MSKT ZIP yoki rentgen suratini yuklang, yoki namuna bilan sinab ko\'ring.', 'Загрузите ZIP с МСКТ или рентгенограмму, либо попробуйте пример.')}</span><button class="btn primary" data-goto="upload">${L('Yuklashga o\'tish', 'Перейти к загрузке')}</button></div>`; return bindGoto(el); }
     const r = measureAll();
     const f = (v, d = 1) => v == null ? '—' : v.toFixed(d);
     const rows = [
-      ['HKA (o\'q og\'ishi)', 'HKA', v => f(v) + '° ' + (v > 0 ? 'var' : 'val'), 'varus 0–3° / valgus 0–2°'],
-      ['MAD (yuklama chizig\'i siljishi)', 'MAD', v => f(v, 0) + ' mm ' + (v >= 0 ? 'med' : 'lat'), '8 ± 7 mm medial'],
+      [L('HKA (o\'q og\'ishi)', 'HKA (отклонение оси)'), 'HKA', v => f(v) + '° ' + (v > 0 ? L('var', 'вар') : L('val', 'вальг')), L('varus 0–3° / valgus 0–2°', 'варус 0–3° / вальгус 0–2°')],
+      [L('MAD (yuklama chizig\'i siljishi)', 'MAD (смещение мех. оси)'), 'MAD', v => f(v, 0) + ' mm ' + (v >= 0 ? L('med', 'мед') : L('lat', 'лат')), L('8 ± 7 mm medial', '8 ± 7 мм медиально')],
       ['mLDFA', 'mLDFA', v => f(v) + '°', '87.5° (85–90°)'],
       ['mMPTA', 'mMPTA', v => f(v) + '°', '87.5° (85–90°)'],
       ['JLCA', 'JLCA', v => f(v) + '°', '0–2°'],
       ['LDTA', 'LDTA', v => f(v) + '°', '89° (86–92°)'],
-      ['Son suyagi uzunligi', 'femur', v => f(v, 0) + ' mm', '—'],
-      ['Boldir uzunligi', 'tibia', v => f(v, 0) + ' mm', '—'],
-      ['Oyoq uzunligi (son boshi–to\'piq)', 'limb', v => f(v, 0) + ' mm', '—'],
+      [L('Son suyagi uzunligi', 'Длина бедра'), 'femur', v => f(v, 0) + ' mm', '—'],
+      [L('Boldir uzunligi', 'Длина голени'), 'tibia', v => f(v, 0) + ' mm', '—'],
+      [L('Oyoq uzunligi (son boshi–to\'piq)', 'Длина ноги (головка бедра–голеностоп)'), 'limb', v => f(v, 0) + ' mm', '—'],
     ];
     const cell = (m, k, fmt) => {
       if (!m || m[k] == null) return `<td class="num"><span class="flag na"></span>—</td>`;
       const ok = C.NORMS[k] ? C.inNorm(k, m[k]) : null;
       return `<td class="num"><span class="flag ${ok == null ? 'na' : ok ? 'ok' : 'out'}"></span>${fmt(m[k])}</td>`;
     };
-    const table = `<div class="tbl-wrap"><table class="params"><thead><tr><th>Parametr</th><th>O'ng</th><th>Chap</th><th>Norma</th></tr></thead><tbody>
+    const table = `<div class="tbl-wrap"><table class="params"><thead><tr><th>${L('Parametr', 'Параметр')}</th><th>${L('O\'ng', 'Правая')}</th><th>${L('Chap', 'Левая')}</th><th>${L('Norma', 'Норма')}</th></tr></thead><tbody>
       ${rows.map(([n, k, fmt, norm]) => `<tr><td>${n}</td>${cell(r.R, k, fmt)}${cell(r.L, k, fmt)}<td class="muted">${norm}</td></tr>`).join('')}
       </tbody></table></div>`;
     const lld = otherLLD();
     let lldCard = '';
     if (lld != null) {
       const a = Math.abs(lld), lvl = a < 10 ? 0 : a < 20 ? 1 : 2;
-      lldCard = `<div class="card" style="display:grid;gap:8px"><span class="eyebrow">Oyoqlar uzunligi</span>
-        <div class="verdict"><div class="big">${a.toFixed(0)}<small> mm</small></div><div><b>${a < 5 ? 'Uzunliklar deyarli teng' : (lld < 0 ? 'O\'ng' : 'Chap') + ' oyoq qisqaroq'}</b><div class="muted" style="font-size:13px">son boshi markazidan to'piq markazigacha</div></div><span class="pill g${lvl}">${['Ahamiyatsiz', 'Yengil farq', 'Sezilarli farq'][lvl]}</span></div>
-        <p class="muted" style="margin:0;font-size:13.5px">10 mm gacha farq ko'pchilikda uchraydi. 20 mm dan ortiq farq tos qiyshayishi va yurish o'zgarishiga olib kelishi mumkin. Tovon va oyoq panjasi bu o'lchovga kirmaydi.</p></div>`;
+      lldCard = `<div class="card" style="display:grid;gap:8px"><span class="eyebrow">${L('Oyoqlar uzunligi', 'Длина ног')}</span>
+        <div class="verdict"><div class="big">${a.toFixed(0)}<small> mm</small></div><div><b>${a < 5 ? L('Uzunliklar deyarli teng', 'Длины почти равны') : (lld < 0 ? L('O\'ng oyoq qisqaroq', 'Правая нога короче') : L('Chap oyoq qisqaroq', 'Левая нога короче'))}</b><div class="muted" style="font-size:13px">${L('son boshi markazidan to\'piq markazigacha', 'от центра головки бедра до центра голеностопа')}</div></div><span class="pill g${lvl}">${(L('a', 'b') === 'b' ? ['Незначимая', 'Небольшая разница', 'Значимая разница'] : ['Ahamiyatsiz', 'Yengil farq', 'Sezilarli farq'])[lvl]}</span></div>
+        <p class="muted" style="margin:0;font-size:13.5px">${L('10 mm gacha farq ko\'pchilikda uchraydi. 20 mm dan ortiq farq tos qiyshayishi va yurish o\'zgarishiga olib kelishi mumkin. Tovon va oyoq panjasi bu o\'lchovga kirmaydi.', 'Разница до 10 мм встречается у большинства людей. Более 20 мм может приводить к перекосу таза и изменению походки. Пятка и стопа в это измерение не входят.')}</p></div>`;
     } else if (S.study.mode === 'xr' && !S.mmpp && !S.study.localizer) {
-      lldCard = `<div class="notice warn">Rentgen kalibrlanmagan — MAD va oyoq uzunliklari hisoblanmadi. «Nuqtalar» bo'limida kalibrlang.</div>`;
+      lldCard = `<div class="notice warn">${L('Rentgen kalibrlanmagan — MAD va oyoq uzunliklari hisoblanmadi. «Nuqtalar» bo\'limida kalibrlang.', 'Рентгенограмма не откалибрована — MAD и длины не рассчитаны. Выполните калибровку в разделе «Точки».')}</div>`;
     }
     const notes = [];
-    if (S.demo) notes.push('Bu <b>namuna</b> — sintetik KT asosida. O\'z faylingizni «Yuklash» bo\'limida yuklang.');
-    if (S.study.localizer) notes.push('O\'lchov KT surview (topogramma) bo\'yicha: yotgan holat, oyoqqa og\'irlik tushmagan. Vertikal masshtab aniq, gorizontal masshtab taxminan ±5%. Bo\'g\'im chiziqlari burchaklari ±2–3° aniqlikda.');
-    if (S.study.mode === 'ct') notes.push('MSKT yotgan holatda, oyoqqa og\'irlik tushmaganda olinadi. Tik turgan holatdagi rentgenda varus/valgus odatda bir necha gradusga kattaroq ko\'rinadi, JLCA esa ayniqsa past baholanadi.');
-    if (S.study.info && S.study.info.sliceGap > 2.01) notes.push(`Kesimlar oralig'i ${S.study.info.sliceGap.toFixed(1)} mm: bo'g'im chiziqlari burchaklari taxminan ±2° aniqlikda.`);
-    if (S.auto) notes.push('Nuqtalar avtomatik taklif qilingan va hali tekshirilmagan. Natijaga tayanishdan oldin har bir nuqtani tasvirda tekshiring.');
-    notes.push('Burilish (torsiya) va sagittal tekislikdagi deformatsiya bu versiyada o\'lchanmaydi.');
+    if (S.demo) notes.push(L('Bu <b>namuna</b> — sintetik KT asosida. O\'z faylingizni «Yuklash» bo\'limida yuklang.', 'Это <b>пример</b> на основе синтетической КТ. Загрузите свой файл в разделе «Загрузка».'));
+    if (S.study.localizer) notes.push(L('O\'lchov KT surview (topogramma) bo\'yicha: yotgan holat, oyoqqa og\'irlik tushmagan. Vertikal masshtab aniq, gorizontal masshtab taxminan ±5%. Bo\'g\'im chiziqlari burchaklari ±2–3° aniqlikda.', 'Измерение по топограмме КТ: положение лёжа, без нагрузки на ногу. Вертикальный масштаб точный, горизонтальный — примерно ±5%. Углы суставных линий — с точностью ±2–3°.'));
+    if (S.study.mode === 'ct') notes.push(L('MSKT yotgan holatda, oyoqqa og\'irlik tushmaganda olinadi. Tik turgan holatdagi rentgenda varus/valgus odatda bir necha gradusga kattaroq ko\'rinadi, JLCA esa ayniqsa past baholanadi.', 'МСКТ выполняется лёжа, без нагрузки на ногу. На рентгенограмме стоя варус/вальгус обычно на несколько градусов больше, а JLCA особенно недооценивается.'));
+    if (S.study.info && S.study.info.sliceGap > 2.01) notes.push(L(`Kesimlar oralig'i ${S.study.info.sliceGap.toFixed(1)} mm: bo'g'im chiziqlari burchaklari taxminan ±2° aniqlikda.`, `Шаг срезов ${S.study.info.sliceGap.toFixed(1)} мм: углы суставных линий — с точностью около ±2°.`));
+    if (S.auto) notes.push(L('Nuqtalar avtomatik taklif qilingan va hali tekshirilmagan. Natijaga tayanishdan oldin har bir nuqtani tasvirda tekshiring.', 'Точки предложены автоматически и ещё не проверены. Прежде чем опираться на результат, проверьте каждую точку на снимке.'));
+    notes.push(L('Torsiya «Rotatsiya» bo\'limida alohida baholanadi. Sagittal tekislikdagi deformatsiya bu versiyada o\'lchanmaydi.', 'Торсия оценивается отдельно в разделе «Ротация». Деформация в сагиттальной плоскости в этой версии не измеряется.'));
     el.innerHTML = `
       <div class="row" style="justify-content:space-between;margin-bottom:4px">
-        <div><span class="eyebrow">Natija${S.demo ? ' · namuna' : ''}</span><h1 style="font-size:clamp(22px,3vw,30px);font-weight:800;margin-top:4px">${summaryLine(r)}</h1></div>
-        <div class="row"><button class="btn" id="copyRep">Hisobotni nusxalash</button><button class="btn primary" data-goto="3d">3D da solishtirish</button></div>
+        <div><span class="eyebrow">${L('Natija', 'Результат')}${S.demo ? ' · ' + L('namuna', 'пример') : ''}</span><h1 style="font-size:clamp(22px,3vw,30px);font-weight:800;margin-top:4px">${summaryLine(r)}</h1></div>
+        <div class="row"><button class="btn" id="copyRep">${L('Hisobotni nusxalash', 'Скопировать отчёт')}</button><button class="btn primary" data-goto="3d">${L('3D da solishtirish', 'Сравнить в 3D')}</button></div>
       </div>
-      ${S.auto ? `<div class="notice warn" style="margin-bottom:6px">Nuqtalar avtomatik qo'yilgan. <button class="btn small" data-goto="points">Tekshirish</button></div>` : ''}
+      ${S.auto ? `<div class="notice warn" style="margin-bottom:6px">${L('Nuqtalar avtomatik qo\'yilgan.', 'Точки расставлены автоматически.')} <button class="btn small" data-goto="points">${L('Tekshirish', 'Проверить')}</button></div>` : ''}
       <div class="legs">${legCard('R', r.R)}${legCard('L', r.L)}</div>
       ${lldCard}
       <div class="two">
-        <div class="card" style="display:grid;gap:10px"><span class="eyebrow">Shifokor uchun: o'lchovlar</span>${table}
-          <p class="muted" style="font-size:12.5px;margin:0">HKA musbat — varus, manfiy — valgus. MAD musbat — chiziq tizza markazidan medialda. Normalar: Paley (2002), Moreland va hamm. (1987).</p></div>
-        <div class="card" style="display:grid;gap:10px"><span class="eyebrow">Tasvirdagi o'qlar</span><div class="thumb"><canvas id="thumb"></canvas></div></div>
+        <div class="card" style="display:grid;gap:10px"><span class="eyebrow">${L('Shifokor uchun: o\'lchovlar', 'Для врача: измерения')}</span>${table}
+          <p class="muted" style="font-size:12.5px;margin:0">${L('HKA musbat — varus, manfiy — valgus. MAD musbat — chiziq tizza markazidan medialda. Normalar: Paley (2002), Moreland va hamm. (1987).', 'HKA положительный — варус, отрицательный — вальгус. MAD положительный — ось проходит медиальнее центра колена. Нормы: Paley (2002), Moreland и соавт. (1987).')}</p></div>
+        <div class="card" style="display:grid;gap:10px"><span class="eyebrow">${L('Tasvirdagi o\'qlar', 'Оси на снимке')}</span><div class="thumb"><canvas id="thumb"></canvas></div></div>
       </div>
-      <div class="card" style="display:grid;gap:8px"><span class="eyebrow">Muhim eslatmalar</span><ul style="margin:0;padding-left:18px;display:grid;gap:4px;font-size:14px">${notes.map(n => `<li>${n}</li>`).join('')}</ul>
-        <span class="eyebrow" style="margin-top:8px">Manbalar</span>
+      <div class="card" style="display:grid;gap:8px"><span class="eyebrow">${L('Muhim eslatmalar', 'Важные замечания')}</span><ul style="margin:0;padding-left:18px;display:grid;gap:4px;font-size:14px">${notes.map(n => `<li>${n}</li>`).join('')}</ul>
+        <span class="eyebrow" style="margin-top:8px">${L('Manbalar', 'Источники')}</span>
         <ol class="refs"><li>Paley D. Principles of Deformity Correction. Springer, 2002.</li><li>Moreland JR, Bassett LW, Hanker GJ. Radiographic analysis of the axial alignment of the lower extremity. J Bone Joint Surg Am. 1987;69(5):745–749.</li><li>Sharma L, Song J, Felson DT, et al. The role of knee alignment in disease progression and functional decline in knee osteoarthritis. JAMA. 2001;286(2):188–195.</li><li>Knutson GA. Anatomic and functional leg-length inequality: a review and recommendation for clinical decision-making. Chiropr Osteopat. 2005;13:11.</li></ol>
       </div>
       <textarea id="repText" hidden readonly style="width:100%;min-height:200px" class="card num"></textarea>`;
     bindGoto(el);
     $('copyRep').addEventListener('click', () => {
       const txt = C.reportText(r);
-      const done = () => { $('copyRep').textContent = 'Nusxalandi'; setTimeout(() => { const b = $('copyRep'); if (b) b.textContent = 'Hisobotni nusxalash'; }, 1600); };
-      const fallback = () => { const t = $('repText'); t.hidden = false; t.value = txt; t.focus(); t.select(); $('copyRep').textContent = 'Matnni belgilab nusxalang'; };
+      const done = () => { $('copyRep').textContent = L('Nusxalandi', 'Скопировано'); setTimeout(() => { const b = $('copyRep'); if (b) b.textContent = L('Hisobotni nusxalash', 'Скопировать отчёт'); }, 1600); };
+      const fallback = () => { const t = $('repText'); t.hidden = false; t.value = txt; t.focus(); t.select(); $('copyRep').textContent = L('Matnni belgilab nusxalang', 'Выделите текст и скопируйте'); };
       try { navigator.clipboard.writeText(txt).then(done, fallback); } catch (e) { fallback(); }
     });
     drawThumb();
@@ -1649,9 +1675,9 @@ var S=Object.defineProperty;var A=(a,t)=>{for(var e in t)S(a,e,{get:t[e],enumera
     const parts = [];
     for (const s of ['R', 'L']) {
       const m = r[s]; if (!m) continue; const c = C.classify(m);
-      parts.push(`${s === 'R' ? 'O\'ng' : 'Chap'}: ${c.type === 'norma' ? 'norma' : c.type + ' ' + Math.abs(m.HKA).toFixed(1) + '°'}`);
+      parts.push(`${s === 'R' ? L('O\'ng', 'Правая') : L('Chap', 'Левая')}: ${c.type === 'norma' ? typeWord('norma') : typeWord(c.type) + ' ' + Math.abs(m.HKA).toFixed(1) + '°'}`);
     }
-    return parts.length ? parts.join(' · ') : 'Nuqtalar to\'liq emas';
+    return parts.length ? parts.join(' · ') : L('Nuqtalar to\'liq emas', 'Точки расставлены не полностью');
   }
   function drawThumb() {
     const c = $('thumb'); if (!c || !S.base) return;
@@ -1669,7 +1695,7 @@ var S=Object.defineProperty;var A=(a,t)=>{for(var e in t)S(a,e,{get:t[e],enumera
   const T3 = { ok: false };
   function init3D() {
     if (T3.ok) return true;
-    if (typeof THREE === 'undefined') { stage3.insertAdjacentHTML('beforeend', '<div class="empty" style="position:absolute;inset:0;color:var(--lightbox-ink)">3D kutubxonasi yuklanmadi. Internetni tekshiring.</div>'); return false; }
+    if (typeof THREE === 'undefined') { stage3.insertAdjacentHTML('beforeend', `<div class="empty" style="position:absolute;inset:0;color:var(--lightbox-ink)">${L('3D kutubxonasi yuklanmadi. Internetni tekshiring.', 'Библиотека 3D не загрузилась. Проверьте интернет.')}</div>`); return false; }
     const R = new THREE.WebGLRenderer({ canvas: cv3, antialias: true });
     R.setClearColor(new THREE.Color(css('--lightbox') || '#0c151b'));
     const scene = new THREE.Scene();
@@ -1710,7 +1736,7 @@ var S=Object.defineProperty;var A=(a,t)=>{for(var e in t)S(a,e,{get:t[e],enumera
     c.lookAt(o.tgt); T3.R.render(T3.scene, c);
   }
   function show3D() {
-    if (!S.study) { stage3.querySelector('.empty') || stage3.insertAdjacentHTML('beforeend', '<div class="empty" style="position:absolute;inset:0;color:var(--lightbox-ink)">Avval tasvir yuklang yoki namunani oching.</div>'); return; }
+    if (!S.study) { stage3.querySelector('.empty') || stage3.insertAdjacentHTML('beforeend', `<div class="empty" style="position:absolute;inset:0;color:var(--lightbox-ink)">${L('Avval tasvir yuklang yoki namunani oching.', 'Сначала загрузите изображение или откройте пример.')}</div>`); return; }
     const e = stage3.querySelector('.empty'); if (e) e.remove();
     if (!init3D()) return;
     $('layerChips').querySelector('[data-layer="cloud"]').hidden = !S.study.cloud;
@@ -1881,12 +1907,12 @@ var S=Object.defineProperty;var A=(a,t)=>{for(var e in t)S(a,e,{get:t[e],enumera
   function saveRot() { try { localStorage.setItem('oyoq-rot', JSON.stringify({ R: ROT.R, L: ROT.L })); } catch (e) { } }
   const fmt1 = v => (v > 0 ? '+' : '') + v.toFixed(1) + '°';
   const stCls = (k, v) => ['st-lo', 'st-ok', 'st-hi'][C.rotStatus(k, v) + 1];
-  const stTxt = (k, v) => ['normadan past', 'normada', 'normadan yuqori'][C.rotStatus(k, v) + 1];
+  const stTxt = (k, v) => (L('a', 'b') === 'b' ? ['ниже нормы', 'норма', 'выше нормы'] : ['normadan past', 'normada', 'normadan yuqori'])[C.rotStatus(k, v) + 1];
   function buildRotLegs() {
     const el = $('rotLegs'); el.innerHTML = '';
     for (const s of ['R', 'L']) {
       const card = document.createElement('article'); card.className = 'card legcard';
-      card.innerHTML = `<header><h2><i class="dot" style="background:${legColor(s)};margin-right:8px"></i>${LEGNAME[s]}</h2><button class="btn small" data-sug="${s}">Korreksiya taklifi</button></header>
+      card.innerHTML = `<header><h2><i class="dot" style="background:${legColor(s)};margin-right:8px"></i>${LEGNAME[s]}</h2><button class="btn small" data-sug="${s}">${L('Korreksiya taklifi', 'Предложить коррекцию')}</button></header>
         <div class="rot-in">${RK.map(([k, lab]) => `<label for="rot-${s}-${k}">${lab}${k === 'k' || k === 'l' ? '' : ', °'}<input id="rot-${s}-${k}" type="number" inputmode="decimal" step="0.1" value="${ROT[s][k] ?? ''}" placeholder="${k === 'k' || k === 'l' ? '0' : '—'}"></label>`).join('')}</div>
         <div class="rv" id="rv-${s}"></div><div id="rx-${s}" style="font-size:14px"></div>`;
       el.appendChild(card);
@@ -1904,12 +1930,12 @@ var S=Object.defineProperty;var A=(a,t)=>{for(var e in t)S(a,e,{get:t[e],enumera
   function explainRot(r) {
     const t = [];
     const f = C.rotStatus('RBed', r.RBed), g = C.rotStatus('RGol', r.RGol), i = C.rotStatus('IntR', r.IntR);
-    if (f > 0) t.push('Son suyagining ichkariga buralishi (anteversiya) oshgan — oyoq panjasi ichkariga qarashga moyil.');
-    if (f < 0) t.push('Son suyagi kam buralgan (retroversiya tomon) — oyoq panjasi tashqariga qarashga moyil.');
-    if (g > 0) t.push('Boldirning tashqi buralishi oshgan — oyoq panjasi tashqariga qaraydi.');
-    if (g < 0) t.push('Boldirning tashqi buralishi kamaygan (ichki torsiya tomon) — oyoq panjasi ichkariga qaraydi.');
-    if (i !== 0) t.push(`Umumiy (integral) rotatsiya ${i > 0 ? 'oshgan: oyoq panjasi tashqariga burilgan' : 'kamaygan: oyoq panjasi ichkariga burilgan'}.`);
-    if (!t.length) t.push('Son, boldir va umumiy rotatsiya normada.');
+    if (f > 0) t.push(L('Son suyagining ichkariga buralishi (anteversiya) oshgan — oyoq panjasi ichkariga qarashga moyil.', 'Антеторсия бедра увеличена — стопа склонна разворачиваться внутрь.'));
+    if (f < 0) t.push(L('Son suyagi kam buralgan (retroversiya tomon) — oyoq panjasi tashqariga qarashga moyil.', 'Антеторсия бедра снижена (в сторону ретроверсии) — стопа склонна разворачиваться наружу.'));
+    if (g > 0) t.push(L('Boldirning tashqi buralishi oshgan — oyoq panjasi tashqariga qaraydi.', 'Наружная торсия голени увеличена — стопа развёрнута наружу.'));
+    if (g < 0) t.push(L('Boldirning tashqi buralishi kamaygan (ichki torsiya tomon) — oyoq panjasi ichkariga qaraydi.', 'Наружная торсия голени снижена (в сторону внутренней торсии) — стопа развёрнута внутрь.'));
+    if (i !== 0) t.push(i > 0 ? L('Umumiy (integral) rotatsiya oshgan: oyoq panjasi tashqariga burilgan.', 'Интегральная ротация увеличена: стопа развёрнута наружу.') : L('Umumiy (integral) rotatsiya kamaygan: oyoq panjasi ichkariga burilgan.', 'Интегральная ротация снижена: стопа развёрнута внутрь.'));
+    if (!t.length) t.push(L('Son, boldir va umumiy rotatsiya normada.', 'Ротация бедра, голени и интегральная ротация в норме.'));
     return t.join(' ');
   }
   function renderRot() {
@@ -1918,45 +1944,54 @@ var S=Object.defineProperty;var A=(a,t)=>{for(var e in t)S(a,e,{get:t[e],enumera
     for (const s of ['R', 'L']) {
       const r = res[s] = C.rotation(ROT[s]);
       const box = $('rv-' + s), ex = $('rx-' + s);
-      if (!r) { box.innerHTML = ''; ex.innerHTML = '<span class="muted">α, β, γ ni kiriting.</span>'; continue; }
+      if (!r) { box.innerHTML = ''; ex.innerHTML = `<span class="muted">${L('α, β, γ ni kiriting.', 'Введите α, β, γ.')}</span>`; continue; }
       const corr = r.k || r.l;
-      box.innerHTML = [['RBed', 'РБед (son)'], ['RGol', 'РГол (boldir)'], ['IntR', 'ИнтР (umumiy)']].map(([k, n]) =>
-        `<div><small>${n}</small><b class="${stCls(k, r[k])}">${r[k].toFixed(1)}°</b><small class="${stCls(k, r[k])}">${stTxt(k, r[k])}</small>${corr ? `<small>korreksiyadan keyin: <b class="${stCls(k, r[k + '2'])}" style="font-size:13px">${r[k + '2'].toFixed(1)}°</b></small>` : ''}</div>`).join('');
-      ex.innerHTML = `<p style="margin:4px 0 0">${explainRot(r)}</p>` + (corr ? `<p class="muted" style="margin:4px 0 0;font-size:13px">Reja: son ${r.k ? fmt1(r.k) + (r.k > 0 ? ' (ichkariga)' : ' (tashqariga)') : '—'}, boldir ${r.l ? fmt1(r.l) + (r.l > 0 ? ' (ichkariga)' : ' (tashqariga)') : '—'}.</p>` : '');
+      box.innerHTML = [['RBed', L('РБед (son)', 'РБед (бедро)')], ['RGol', L('РГол (boldir)', 'РГол (голень)')], ['IntR', L('ИнтР (umumiy)', 'ИнтР (интегральная)')]].map(([k, n]) =>
+        `<div><small>${n}</small><b class="${stCls(k, r[k])}">${r[k].toFixed(1)}°</b><small class="${stCls(k, r[k])}">${stTxt(k, r[k])}</small>${corr ? `<small>${L('korreksiyadan keyin', 'после коррекции')}: <b class="${stCls(k, r[k + '2'])}" style="font-size:13px">${r[k + '2'].toFixed(1)}°</b></small>` : ''}</div>`).join('');
+      ex.innerHTML = `<p style="margin:4px 0 0">${explainRot(r)}</p>` + (corr ? `<p class="muted" style="margin:4px 0 0;font-size:13px">${L('Reja: son', 'План: бедро')} ${r.k ? fmt1(r.k) + (r.k > 0 ? L(' (ichkariga)', ' (внутрь)') : L(' (tashqariga)', ' (наружу)')) : '—'}, ${L('boldir', 'голень')} ${r.l ? fmt1(r.l) + (r.l > 0 ? L(' (ichkariga)', ' (внутрь)') : L(' (tashqariga)', ' (наружу)')) : '—'}.</p>` : '');
     }
     const rows = [['RBed', 'РБед (10–20)'], ['RGol', 'РГол (20–30)'], ['IntR', 'ИнтР (10–20)']];
     const cell = (r, k) => r ? `<td class="num ${stCls(k, r[k])}">${r[k].toFixed(1)}°</td>` : '<td class="num">—</td>';
     const cell2 = (r, k) => r && (r.k || r.l) ? `<td class="num ${stCls(k, r[k + '2'])}">${r[k + '2'].toFixed(1)}°</td>` : '<td class="num muted">—</td>';
-    $('rotTable').innerHTML = `<thead><tr><th>Ko'rsatkich</th><th>O'ng</th><th>Chap</th><th>Farq</th><th>O'ng (keyin)</th><th>Chap (keyin)</th></tr></thead><tbody>` +
+    $('rotTable').innerHTML = `<thead><tr><th>${L('Ko\'rsatkich', 'Показатель')}</th><th>${L('O\'ng', 'Правая')}</th><th>${L('Chap', 'Левая')}</th><th>${L('Farq', 'Разница')}</th><th>${L('O\'ng (keyin)', 'Правая (после)')}</th><th>${L('Chap (keyin)', 'Левая (после)')}</th></tr></thead><tbody>` +
       rows.map(([k, n]) => `<tr><td>${n}</td>${cell(res.R, k)}${cell(res.L, k)}<td class="num">${res.R && res.L ? Math.abs(res.R[k] - res.L[k]).toFixed(1) + '°' : '—'}</td>${cell2(res.R, k)}${cell2(res.L, k)}</tr>`).join('') + '</tbody>';
     const sum = [];
     if (res.R && res.L) {
       const dF = Math.abs(res.R.RBed - res.L.RBed), dT = Math.abs(res.R.RGol - res.L.RGol);
-      if (dF > 10 || dT > 10) sum.push(`<div class="notice warn">Ikki oyoq orasida sezilarli farq: son ${dF.toFixed(1)}°, boldir ${dT.toFixed(1)}°. 10° dan ortiq assimetriya yurishda seziladi.</div>`);
+      if (dF > 10 || dT > 10) sum.push(`<div class="notice warn">${L(`Ikki oyoq orasida sezilarli farq: son ${dF.toFixed(1)}°, boldir ${dT.toFixed(1)}°. 10° dan ortiq assimetriya yurishda seziladi.`, `Значимая асимметрия между ногами: бедро ${dF.toFixed(1)}°, голень ${dT.toFixed(1)}°. Асимметрия более 10° заметна при ходьбе.`)}</div>`);
     }
-    if (!res.R && !res.L) sum.push('<span class="muted">Burchaklar kiritilmagan.</span>');
-    $('rotSummary').innerHTML = sum.join('') || '<span class="muted">Assimetriya 10° dan kam.</span>';
+    if (!res.R && !res.L) sum.push(`<span class="muted">${L('Burchaklar kiritilmagan.', 'Углы не введены.')}</span>`);
+    $('rotSummary').innerHTML = sum.join('') || `<span class="muted">${L('Assimetriya 10° dan kam.', 'Асимметрия менее 10°.')}</span>`;
     ROT.res = res;
   }
   $('rotClear').addEventListener('click', () => { ROT.R = {}; ROT.L = {}; ROT.demo = false; saveRot(); buildRotLegs(); renderRot(); });
   $('rotCopy').addEventListener('click', () => {
-    const L = ['ROTATSIYA (Bagirov sxemasi)'];
+    const LN = [L('ROTATSIYA (Bagirov sxemasi)', 'РОТАЦИЯ (схема Багирова)')];
     for (const s of ['R', 'L']) {
       const r = ROT.res && ROT.res[s]; if (!r) continue; const x = ROT[s];
-      L.push(`${s === 'R' ? 'O\'ng' : 'Chap'}: α ${x.a}°, β ${x.b}°, γ ${x.g}° → РБед ${r.RBed.toFixed(1)}° (${stTxt('RBed', r.RBed)}), РГол ${r.RGol.toFixed(1)}° (${stTxt('RGol', r.RGol)}), ИнтР ${r.IntR.toFixed(1)}° (${stTxt('IntR', r.IntR)})` +
+      LN.push(`${s === 'R' ? L('O\'ng', 'Правая') : L('Chap', 'Левая')}: α ${x.a}°, β ${x.b}°, γ ${x.g}° → РБед ${r.RBed.toFixed(1)}° (${stTxt('RBed', r.RBed)}), РГол ${r.RGol.toFixed(1)}° (${stTxt('RGol', r.RGol)}), ИнтР ${r.IntR.toFixed(1)}° (${stTxt('IntR', r.IntR)})` +
         (r.k || r.l ? ` | УКБ ${r.k}°, УКГ ${r.l}° → ${r.RBed2.toFixed(1)}° / ${r.RGol2.toFixed(1)}° / ${r.IntR2.toFixed(1)}°` : ''));
     }
-    const txt = L.join('\n'), b = $('rotCopy');
-    try { navigator.clipboard.writeText(txt).then(() => { b.textContent = 'Nusxalandi'; setTimeout(() => b.textContent = 'Natijani nusxalash', 1500); }, () => { b.textContent = 'Nusxalab bo\'lmadi'; }); } catch (e) { b.textContent = 'Nusxalab bo\'lmadi'; }
+    const txt = LN.join('\n'), b = $('rotCopy');
+    const no = L('Nusxalab bo\'lmadi', 'Не удалось скопировать');
+    try { navigator.clipboard.writeText(txt).then(() => { b.textContent = L('Nusxalandi', 'Скопировано'); setTimeout(() => b.textContent = L('Natijani nusxalash', 'Скопировать результат'), 1500); }, () => { b.textContent = no; }); } catch (e) { b.textContent = no; }
   });
 
   // --- KT aksial kesimda o'q o'lchash ---
   const AX = { side: 'R', axis: 'neck', pts: { R: {}, L: {} }, idx: 0, img: null, V: { s: 1, tx: 0, ty: 0 }, fitted: false, seq: 0 };
-  const AXHINT = {
-    neck: 'α: 1) son boshining markazini, 2) son bo\'yni asosining (katta ko\'st sohasi) markazini bosing. Nuqtalar turli kesimlarda bo\'lishi mumkin.',
-    cond: 'β: son kondillarining orqa chekkalariga — ichki va tashqi kondilga bittadan nuqta qo\'ying (tizza bo\'g\'imi ustidagi kesimda).',
-    mall: 'γ: ichki va tashqi to\'piq (malleol) markazlariga bittadan nuqta qo\'ying (plafond darajasidagi kesimda).',
+  const AXHINT_ = {
+    uz: {
+      neck: 'α: 1) son boshining markazini, 2) son bo\'yni asosining (katta ko\'st sohasi) markazini bosing. Nuqtalar turli kesimlarda bo\'lishi mumkin.',
+      cond: 'β: son kondillarining orqa chekkalariga — ichki va tashqi kondilga bittadan nuqta qo\'ying (tizza bo\'g\'imi ustidagi kesimda).',
+      mall: 'γ: ichki va tashqi to\'piq (malleol) markazlariga bittadan nuqta qo\'ying (plafond darajasidagi kesimda).',
+    },
+    ru: {
+      neck: 'α: отметьте 1) центр головки бедра, 2) центр основания шейки (область большого вертела). Точки могут быть на разных срезах.',
+      cond: 'β: поставьте по точке на задние края медиального и латерального мыщелков бедра (на срезе над коленным суставом).',
+      mall: 'γ: поставьте по точке в центры медиальной и латеральной лодыжек (на срезе на уровне плафона).',
+    },
   };
+  const AXHINT = new Proxy({}, { get: (_, k) => AXHINT_[L('uz', 'ru')][k] });
   const axStage = $('axStage'), axCv = $('axCv'), axCtx = axCv.getContext('2d');
   function showRot() {
     if (!$('rotLegs').children.length) buildRotLegs();
@@ -1968,7 +2003,7 @@ var S=Object.defineProperty;var A=(a,t)=>{for(var e in t)S(a,e,{get:t[e],enumera
       AX.list = s.slices.filter(x => x.entry).sort((a, b) => b.z - a.z); // yuqoridan pastga
       AX.pts = { R: {}, L: {} }; AX.fitted = false; AX.idx = Math.floor(AX.list.length / 2);
       $('axZ').max = AX.list.length - 1; $('axZ').value = AX.idx; S.axDirty = false;
-      $('axInfo').textContent = `${s.desc || 'Aksial seriya'} · ${AX.list.length} kesim`;
+      $('axInfo').textContent = `${s.desc || L('Aksial seriya', 'Аксиальная серия')} · ${AX.list.length} ${L('kesim', 'срезов')}`;
       loadAx();
     } else sizeAx();
     renderAxList(); $('axHint').textContent = AXHINT[AX.axis];
@@ -1981,14 +2016,14 @@ var S=Object.defineProperty;var A=(a,t)=>{for(var e in t)S(a,e,{get:t[e],enumera
   }
   async function loadAx() {
     const sl = AX.list[AX.idx], seq = ++AX.seq;
-    $('axZLabel').textContent = `Kesim ${AX.idx + 1}/${AX.list.length} · z = ${sl.z.toFixed(1)} mm`;
+    $('axZLabel').textContent = `${L('Kesim', 'Срез')} ${AX.idx + 1}/${AX.list.length} · z = ${sl.z.toFixed(1)} mm`;
     try {
       const d = await C.readSlice(sl.entry); if (seq !== AX.seq) return;
       const c = AX.img || document.createElement('canvas'); c.width = d.cols; c.height = d.rows;
       const g = c.getContext('2d'), id = g.createImageData(d.cols, d.rows), px = id.data;
       for (let i = 0; i < d.hu.length; i++) { const v = Math.max(0, Math.min(255, (d.hu[i] + 250) / 1550 * 255)); px[i * 4] = px[i * 4 + 1] = px[i * 4 + 2] = v; px[i * 4 + 3] = 255; }
       g.putImageData(id, 0, 0); AX.img = c; AX.geo = d; sizeAx();
-    } catch (e) { $('axZLabel').textContent = 'Kesimni o\'qib bo\'lmadi: ' + (e.message || e); }
+    } catch (e) { $('axZLabel').textContent = L('Kesimni o\'qib bo\'lmadi: ', 'Не удалось прочитать срез: ') + (e.message || e); }
   }
   // piksel <-> bemor mm
   const axToMM = (c, r) => { const g = AX.geo; return [g.pos[0] + c * g.ps[1] * g.ori[0], g.pos[1] + r * g.ps[0] * g.ori[4]]; };
@@ -2009,10 +2044,10 @@ var S=Object.defineProperty;var A=(a,t)=>{for(var e in t)S(a,e,{get:t[e],enumera
       for (const q of scr) { axCtx.beginPath(); axCtx.arc(q[0], q[1], 5, 0, 7); q[2] ? axCtx.fill() : axCtx.stroke(); }
       axCtx.globalAlpha = 1;
     }
-    $('axHud').textContent = 'OLDI ▲';
+    $('axHud').textContent = L('OLDI ▲', 'ПЕРЕДИ ▲');
   }
   function renderAxList() {
-    const NAMES = { neck: 'α son bo\'yni', cond: 'kondillar (β = −)', mall: 'γ to\'piq' };
+    const NAMES = { neck: L('α son bo\'yni', 'α шейка бедра'), cond: L('kondillar (β = −)', 'мыщелки (β = −)'), mall: L('γ to\'piq', 'γ лодыжки') };
     $('axList').innerHTML = ['R', 'L'].map(s => `<div><span class="muted" style="font-size:12px">${LEGNAME[s]}</span><br>` +
       ['neck', 'cond', 'mall'].map(a => { const p = AX.pts[s][a]; const v = p && p.length === 2 ? C.axisAngle(p[0], p[1], s) : null; return `<span style="font-size:13px">${NAMES[a]}: <b class="num">${v == null ? '—' : v.toFixed(1) + '°'}</b></span>`; }).join('<br>') + '</div>').join('');
   }
@@ -2054,6 +2089,14 @@ var S=Object.defineProperty;var A=(a,t)=>{for(var e in t)S(a,e,{get:t[e],enumera
   }
 
   window.__oyoqDebug = { AX, S, ROT };
+  // Til almashganda dinamik qismlarni qayta chizish
+  window.__oyoqRerender = () => {
+    renderList(); updateLive(); updateCalState(); draw();
+    if (S.study && !$('studyCard').hidden) showStudyCard();
+    if (!$('v-result').hidden) renderResults();
+    if ($('rotLegs').children.length) { buildRotLegs(); renderRot(); }
+    if (!$('axTool').hidden) { renderAxList(); $('axHint').textContent = AXHINT[AX.axis]; drawAx(); }
+  };
   // ---------------- Boshlash ----------------
   renderList();
   updateLive();
@@ -2061,6 +2104,97 @@ var S=Object.defineProperty;var A=(a,t)=>{for(var e in t)S(a,e,{get:t[e],enumera
     let t = 'upload'; try { t = localStorage.getItem('oyoq-tab') || 'upload'; } catch (e) { }
     if (t !== 'upload' && tabs.includes(t)) showTab(t);
   });
+})();
+
+</script>
+<script>
+/* Oyoq O'qi — interfeys tili (o'zbek / rus). Statik matnlar shu lug'at bilan almashtiriladi,
+   dinamik matnlar app.js ichida L(uz, ru) orqali yoziladi. */
+(function () {
+  const RU = {
+    "MSKT bo'yicha oyoq o'qi tahlili": 'Анализ оси ног по МСКТ',
+    'Namuna': 'Пример', 'Bosqichlar': 'Этапы',
+    'Yuklash': 'Загрузка', 'Nuqtalar': 'Точки', 'Natija': 'Результат', 'Rotatsiya': 'Ротация',
+    "Oyoq o'qi va deformatsiya tahlili": 'Анализ оси и деформации ног',
+    "MSKT faylini yuklang — oyog'ingiz normadan qancha og'ganini ko'ring": 'Загрузите МСКТ — узнайте, насколько ось ноги отклонена от нормы',
+    "Dastur MSKT (KT) tasvirlaridan butun oyoqning rentgenga o'xshash ko'rinishini yasaydi, asosiy nuqtalarni taklif qiladi, burchaklarni o'lchab normaga solishtiradi va oyog'ingizni 3D ko'rinishda norma bilan yonma-yon ko'rsatadi.": 'Программа строит из МСКТ изображение всей ноги, похожее на рентгенограмму, предлагает ключевые точки, измеряет углы, сравнивает их с нормой и показывает вашу ногу рядом с нормой в 3D.',
+    '1-qadam': 'Шаг 1', '2-qadam': 'Шаг 2', '3-qadam': 'Шаг 3',
+    'ZIP faylni tanlang': 'Выберите ZIP-файл',
+    'Diskdagi DICOM papkasini ZIP qilib yuklang': 'Заархивируйте папку DICOM с диска в ZIP и загрузите',
+    'Nuqtalarni tekshiring': 'Проверьте точки',
+    "7 ta nuqta har bir oyoq uchun, kerak bo'lsa suring": '7 точек на каждую ногу, при необходимости сдвиньте',
+    'Natija va 3D': 'Результат и 3D',
+    'Burchaklar, daraja, xavflar, norma bilan taqqoslash': 'Углы, степень, риски, сравнение с нормой',
+    "Ma'lumotlaringiz telefoningizdan chiqmaydi.": 'Ваши данные не покидают телефон.',
+    "Barcha hisob-kitob shu qurilmaning o'zida bajariladi, fayllar hech qayerga yuborilmaydi.": 'Все вычисления выполняются на этом устройстве, файлы никуда не отправляются.',
+    'Faylni shu yerga tashlang yoki tanlang': 'Перетащите файл сюда или выберите',
+    "Butun oyoq tushirilgan seriya kerak: son-chanoq bo'g'imidan to'piqgacha. Kesim qalinligi 1–1.5 mm bo'lsa, natija aniqroq.": 'Нужна серия, охватывающая всю ногу: от тазобедренного сустава до голеностопа. При толщине среза 1–1,5 мм результат точнее.',
+    'ZIP tanlash': 'Выбрать ZIP',
+    'Yoki tik turgan holatdagi rentgen': 'Или рентгенограмма стоя',
+    "Butun oyoq rentgen surati (JPG/PNG). Burchaklar o'lchanadi; mm uchun kalibrlash kerak.": 'Рентгенограмма всей ноги (JPG/PNG). Углы измеряются; для мм нужна калибровка.',
+    'Rasm tanlash': 'Выбрать снимок', "O'qilmoqda…": 'Чтение…',
+    'Topilgan seriyalar': 'Найденные серии', 'Shu seriyani ochish': 'Открыть эту серию',
+    "Namuna bemor bilan sinab ko'rish": 'Попробовать на примере',
+    'Oyoq': 'Нога', "O'ng oyoq": 'Правая нога', 'Chap oyoq': 'Левая нога',
+    'Avto-taklif': 'Автоподбор', 'Bu oyoqni tozalash': 'Очистить эту ногу', "Natijani ko'rish": 'Показать результат',
+    "Ko'rinish": 'Вид', "Rentgen ko'rinishi": 'Рентген-вид', 'Suyak (MIP)': 'Кость (MIP)', 'Asl tasvir': 'Исходный снимок',
+    'Kontur': 'Контур', 'Kontrast': 'Контраст', 'Kalibrlash (mm uchun)': 'Калибровка (для мм)',
+    "O'lchami ma'lum obyektning (kalibrovka shari, chizg'ich) ikki chetiga bosing, so'ng haqiqiy uzunligini kiriting.": 'Отметьте два края объекта известного размера (калибровочный шар, линейка), затем введите его реальную длину.',
+    'Ikki nuqta belgilash': 'Отметить две точки', 'Uzunlik, mm': 'Длина, мм', 'mm': 'мм',
+    "Kalibrlanmagan: faqat burchaklar ko'rsatiladi.": 'Без калибровки: показываются только углы.',
+    "O'NG ◂": 'ПРАВ ◂', '▸ CHAP': '▸ ЛЕВ',
+    'Kattalashtirish': 'Увеличить', 'Kichraytirish': 'Уменьшить', "Butunini ko'rsatish": 'Показать целиком',
+    "OLDINDAN KO'RINISH": 'ВИД СПЕРЕДИ', 'Old tomondan': 'Спереди', 'O': 'П', 'Yon tomondan': 'Сбоку', 'Y': 'Б', 'Markazlash': 'Центрировать',
+    "Ko'rsatish": 'Показать', 'KT suyaklari': 'Кости по КТ', 'Sxema': 'Схема', 'Norma': 'Норма', "O'q chiziqlari": 'Линии осей',
+    'Ikkalasi': 'Обе', "O'ng": 'Правая', 'Chap': 'Левая',
+    "To'g'rilangan holatni ko'rish": 'Посмотреть исправленное положение',
+    "Hozirgi holat → o'q to'g'rilangan holat": 'Сейчас → ось исправлена',
+    "Boldir qismi tizza markazi atrofida burilib, son o'qining davomiga keltiriladi. Bu operatsiya rejasi emas, faqat tushunish uchun ko'rinish.": 'Голень поворачивается вокруг центра колена и выводится на продолжение оси бедра. Это не план операции, а наглядная иллюстрация.',
+    "Sizning yuklama o'qingiz (son boshi → to'piq)": 'Ваша механическая ось (головка бедра → голеностоп)',
+    "Normal o'q: tizza markazidan o'tadi": 'Нормальная ось: проходит через центр колена',
+    'Sizning suyaklaringiz': 'Ваши кости', 'Normal holatdagi oyoq (shaffof)': 'Нога в норме (прозрачная)',
+    'Torsiya · Bagirov sxemasi': 'Торсия · схема Багирова', 'Son va boldir rotatsiyasi': 'Ротация бедра и голени',
+    'KT kesimlarida gorizontalga nisbatan uchta burchak:': 'Три угла на срезах КТ относительно горизонтали:',
+    "— son bo'yni o'qi,": '— ось шейки бедра,',
+    "— son kondillarining orqa chizig'i,": '— задняя линия мыщелков бедра,',
+    "— to'piq o'qi. Burchaklarni qo'lda kiriting yoki pastda KT kesimida bosib o'lchang.": '— ось лодыжек. Введите углы вручную или измерьте ниже на срезе КТ.',
+    'Namuna qiymatlar': 'Пример значений', 'Tozalash': 'Очистить', 'Natijani nusxalash': 'Скопировать результат', 'Xulosa': 'Итог',
+    "Normalar: РБед 10–20°, РГол 20–30°, ИнтР 10–20°. ИнтР = РГол − РБед. УКБ/УКГ: «+» — ichkariga, «−» — tashqariga burish. Boldir torsiyasi son kondillari chizig'iga (β) nisbatan hisoblanadi, shuning uchun tizzadagi rotatsiyani ham o'z ichiga oladi.": 'Нормы: РБед 10–20°, РГол 20–30°, ИнтР 10–20°. ИнтР = РГол − РБед. УКБ/УКГ: «+» — ротация внутрь, «−» — наружу. Торсия голени считается относительно линии мыщелков бедра (β), поэтому включает и ротацию в коленном суставе.',
+    "KT kesimida o'lchash": 'Измерение на срезе КТ',
+    "Aksial KT seriyasi yuklanganda bu yerda kesimlarni ko'rib, o'qlarni bosib belgilash mumkin. «Yuklash» bo'limida MSKT ZIP faylini oching.": 'После загрузки аксиальной серии КТ здесь можно листать срезы и отмечать оси. Откройте ZIP с МСКТ в разделе «Загрузка».',
+    "O'q": 'Ось', "α Son bo'yni": 'α Шейка бедра', 'β Kondillar': 'β Мыщелки', "γ To'piq": 'γ Лодыжки', 'OLD': 'ПЕРЕД', 'Kesim': 'Срез',
+    "Bu o'qni qayta belgilash": 'Отметить эту ось заново', "O'lchangan burchaklarni kiritish": 'Внести измеренные углы',
+    "Ishora qoidasi: o'qning ichki (medial) uchi tashqi uchidan oldinda bo'lsa — musbat. α va γ shunday olinadi, β esa teskari ishora bilan (β = −kondillar burchagi), shunda РБед = α+β va РГол = β+γ klassik anteversiya va boldir torsiyasiga teng bo'ladi. Bu ishora qoidasi Excel ma'lumotlari asosida aniqlangan — sxema muallifi bilan tasdiqlang.": 'Правило знака: если медиальный конец оси впереди латерального — угол положительный. Так берутся α и γ, а β — с обратным знаком (β = −угол мыщелков); тогда РБед = α+β и РГол = β+γ соответствуют классической антеторсии бедра и торсии голени. Правило знака выведено из данных таблицы Excel — подтвердите его у автора схемы.',
+    "Oyoq O'qi — o'quv va yordamchi vosita. Tashxis qo'ymaydi va davolash rejasini almashtirmaydi; natijani ortoped-travmatolog tekshirishi shart.": 'Oyoq O\'qi — учебный и вспомогательный инструмент. Не ставит диагноз и не заменяет план лечения; результат обязательно проверяет травматолог-ортопед.',
+  };
+  const SKIP = new Set(['resultBody', 'lmList', 'liveBox', 'rotLegs', 'rotSummary', 'rotTable', 'axList', 'studyCard', 'loadMsg', 'guideTitle', 'guideText', 'tip', 'calState', 'axHint', 'axInfo', 'axZLabel', 'hudInfo', 'axHud', 'seriesSel', 'loadTitle', 'loadNote', 'miniLeg']);
+  const orig = new WeakMap(), origAttr = new WeakMap();
+  const norm = s => s.replace(/\s+/g, ' ').trim();
+  function walk(node, lang) {
+    if (node.nodeType === 1) {
+      if (SKIP.has(node.id) || node.tagName === 'SCRIPT' || node.tagName === 'STYLE' || node.tagName === 'svg') return;
+      for (const a of ['aria-label', 'placeholder', 'title']) {
+        if (!node.hasAttribute(a)) continue;
+        let o = origAttr.get(node) || {}; if (!(a in o)) { o[a] = node.getAttribute(a); origAttr.set(node, o); }
+        const uz = o[a]; node.setAttribute(a, lang === 'ru' && RU[norm(uz)] ? RU[norm(uz)] : uz);
+      }
+      for (const c of node.childNodes) walk(c, lang);
+    } else if (node.nodeType === 3) {
+      if (!orig.has(node)) { const t = norm(node.nodeValue); if (!t || !RU[t]) return; orig.set(node, node.nodeValue); }
+      const uz = orig.get(node), t = norm(uz);
+      node.nodeValue = lang === 'ru' ? uz.replace(t, RU[t]) : uz;
+    }
+  }
+  function apply(lang) {
+    window.OYOQ_LANG = lang;
+    try { localStorage.setItem('oyoq-lang', lang); } catch (e) { }
+    document.documentElement.lang = lang === 'ru' ? 'ru' : 'uz';
+    walk(document.body, lang);
+    document.querySelectorAll('#langSeg button').forEach(b => b.setAttribute('aria-pressed', b.dataset.lang === lang ? 'true' : 'false'));
+    if (window.__oyoqRerender) window.__oyoqRerender();
+  }
+  document.getElementById('langSeg').addEventListener('click', e => { const b = e.target.closest('button'); if (b && b.dataset.lang !== window.OYOQ_LANG) apply(b.dataset.lang); });
+  apply(window.OYOQ_LANG === 'ru' ? 'ru' : 'uz');
 })();
 
 </script>
